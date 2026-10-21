@@ -32,7 +32,7 @@
 | A4 | Store: `actions.ts`（打刻・切替・業務CRUD・補正・打刻忘れ・再開の純粋更新関数とバリデーション）＋テスト | A | 作業中 | A1 | src/store/actions.ts |
 | A5 | Store: `persistence.ts`（localStorage・破損時退避・storageイベント）、`backup.ts`（入出力検証・最終バックアップ日時）、`createAppStore.ts` 組み立て＋テスト | A | 未着手 | A4 | src/store/** |
 | B1 | UI土台: `tokens.css`（群青/赤・余白・角丸4px）、`app.css`、SVGアイコン一式、hashルーティング、ナビ（PC上部/スマホ下部）、`useAppState`/`useNow`、`dev/fakeStore.ts` | B | レビュー待ち | L1 | src/ui/App.tsx, hooks/, styles/, icons/, dev/ |
-| B2 | 今日画面: 業務開始/終了/再開、計測中業務と経過時間、終業目安・残り時間、業務ボタン（計測中を強調）＋休憩ボタン、その場で新規業務作成、当日の業務別累計、バックアップ注意表示 | B | 未着手 | B1 | src/ui/screens/TodayScreen.tsx, components/ |
+| B2 | 今日画面: 業務開始/終了/再開、計測中業務と経過時間、終業目安・残り時間、業務ボタン（計測中を強調）＋休憩ボタン、その場で新規業務作成、当日の業務別累計、バックアップ注意表示 | B | レビュー待ち | B1 | src/ui/screens/TodayScreen.tsx, components/ |
 | B3 | 集計画面: 日/週/月切替と前後移動、業務別合計表、日次は±分補正入力と切り替え履歴（時刻・業務） | B | 未着手 | B1 | src/ui/screens/SummaryScreen.tsx |
 | B4 | 業務管理画面（改名・非表示/再表示・上下並べ替え）、データ画面（書き出し/読み込み・最終バックアップ日時・「データはこの端末のブラウザにのみ保存」の説明）、打刻忘れダイアログ | B | 未着手 | B1 | src/ui/screens/TasksScreen.tsx, DataScreen.tsx |
 | B5 | fakeStore → 実Store差し替え（`main.tsx`）、`dev/` 削除、375px 幅確認 | B | 未着手 | A5, B2-B4 | src/main.tsx, src/ui/dev/ |

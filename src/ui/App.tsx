@@ -2,6 +2,7 @@ import type { ReactElement } from 'react';
 import type { AppStore } from '../shared/types';
 import { Nav } from './components/Nav';
 import { useRoute, type RouteId } from './hooks/useRoute';
+import { TodayScreen } from './screens/TodayScreen';
 import './styles/tokens.css';
 import './styles/app.css';
 
@@ -21,8 +22,9 @@ interface ScreenProps {
   store: AppStore;
 }
 
-/** 各画面は B2〜B4 で差し替える。それまでは見出しだけの仮表示。 */
-function Screen({ route }: ScreenProps): ReactElement {
+/** 今日画面以外は B3・B4 で差し替える。それまでは見出しだけの仮表示。 */
+function Screen({ route, store }: ScreenProps): ReactElement {
+  if (route === 'today') return <TodayScreen store={store} />;
   return <h1 className="screen__title">{SCREEN_TITLES[route]}</h1>;
 }
 

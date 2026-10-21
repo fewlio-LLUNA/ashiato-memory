@@ -4,7 +4,7 @@
 > 更新したら即コミット（`docs: ボード更新`）。各ワーカーは**自分の行だけ**書き換える。
 > 構造変更（タスク追加・境界変更・要相談の裁定）はリーダーOpusが行う。
 
-最終更新: リーダーOpus 2026-10-21（L1・L2 完了）
+最終更新: リーダーOpus 2026-10-21（巡回レビュー1回目）
 
 ## ファイルオーナーシップ（並行作業の境界）
 - **Sonnet A**: `src/domain/**`, `src/store/**`
@@ -24,18 +24,18 @@
 
 | ID | 内容 | 担当 | 状態 | 依存 | 主な対象ファイル |
 |----|------|------|------|------|------------------|
-| L1 | 土台: git init、Vite+React+TS(strict)、ESLint、Vitest、npm scripts（dev/build/test/lint/typecheck）、`src/shared/` に設計書§4の型・定数を書き起こし、各レイヤーの空ディレクトリ、`main.tsx` の仮エントリ | L | 未着手 | - | package.json, tsconfig, vite.config.ts, src/shared/** |
+| L1 | 土台: git init、Vite+React+TS(strict)、ESLint、Vitest、npm scripts（dev/build/test/lint/typecheck）、`src/shared/` に設計書§4の型・定数を書き起こし、各レイヤーの空ディレクトリ、`main.tsx` の仮エントリ | L | 完了 | - | package.json, tsconfig, vite.config.ts, src/shared/** |
 | L2 | 本番ビルド時のCSP注入（外部通信遮断）、GitHub Actions で test→build→Pages デプロイ。リポジトリ作成・push はユーザー確認後 | L | 完了 | L1 | vite.config.ts, .github/workflows/deploy.yml |
-| A1 | Domain: `time.ts`（日付キー・週/月範囲・区間長）＋テスト | A | レビュー待ち | L1 | src/domain/time.ts |
-| A2 | Domain: `summary.ts`（日次/期間集計・最大剰余法の丸め・getActiveDay・findStaleDay）＋テスト | A | レビュー待ち | A1 | src/domain/summary.ts |
-| A3 | Domain: `flex.ts`（終業目安）、`format.ts`（表示整形）＋テスト | A | レビュー待ち | A1 | src/domain/flex.ts, format.ts |
-| A4 | Store: `actions.ts`（打刻・切替・業務CRUD・補正・打刻忘れ・再開の純粋更新関数とバリデーション）＋テスト | A | レビュー待ち | A1 | src/store/actions.ts |
-| A5 | Store: `persistence.ts`（localStorage・破損時退避・storageイベント）、`backup.ts`（入出力検証・最終バックアップ日時）、`createAppStore.ts` 組み立て＋テスト | A | レビュー待ち | A4 | src/store/** |
-| B1 | UI土台: `tokens.css`（群青/赤・余白・角丸4px）、`app.css`、SVGアイコン一式、hashルーティング、ナビ（PC上部/スマホ下部）、`useAppState`/`useNow`、`dev/fakeStore.ts` | B | レビュー待ち | L1 | src/ui/App.tsx, hooks/, styles/, icons/, dev/ |
-| B2 | 今日画面: 業務開始/終了/再開、計測中業務と経過時間、終業目安・残り時間、業務ボタン（計測中を強調）＋休憩ボタン、その場で新規業務作成、当日の業務別累計、バックアップ注意表示 | B | レビュー待ち | B1 | src/ui/screens/TodayScreen.tsx, components/ |
-| B3 | 集計画面: 日/週/月切替と前後移動、業務別合計表、日次は±分補正入力と切り替え履歴（時刻・業務） | B | レビュー待ち | B1 | src/ui/screens/SummaryScreen.tsx |
-| B4 | 業務管理画面（改名・非表示/再表示・上下並べ替え）、データ画面（書き出し/読み込み・最終バックアップ日時・「データはこの端末のブラウザにのみ保存」の説明）、打刻忘れダイアログ | B | レビュー待ち | B1 | src/ui/screens/TasksScreen.tsx, DataScreen.tsx |
-| B5 | fakeStore → 実Store差し替え（`main.tsx`）、`dev/` 削除、375px 幅確認 | B | レビュー待ち | A5, B2-B4 | src/main.tsx, src/ui/dev/ |
+| A1 | Domain: `time.ts`（日付キー・週/月範囲・区間長）＋テスト | A | 完了 | L1 | src/domain/time.ts |
+| A2 | Domain: `summary.ts`（日次/期間集計・最大剰余法の丸め・getActiveDay・findStaleDay）＋テスト | A | 完了 | A1 | src/domain/summary.ts |
+| A3 | Domain: `flex.ts`（終業目安）、`format.ts`（表示整形）＋テスト | A | 完了 | A1 | src/domain/flex.ts, format.ts |
+| A4 | Store: `actions.ts`（打刻・切替・業務CRUD・補正・打刻忘れ・再開の純粋更新関数とバリデーション）＋テスト | A | 完了 | A1 | src/store/actions.ts |
+| A5 | Store: `persistence.ts`（localStorage・破損時退避・storageイベント）、`backup.ts`（入出力検証・最終バックアップ日時）、`createAppStore.ts` 組み立て＋テスト | A | 完了 | A4 | src/store/** |
+| B1 | UI土台: `tokens.css`（群青/赤・余白・角丸4px）、`app.css`、SVGアイコン一式、hashルーティング、ナビ（PC上部/スマホ下部）、`useAppState`/`useNow`、`dev/fakeStore.ts` | B | 完了 | L1 | src/ui/App.tsx, hooks/, styles/, icons/, dev/ |
+| B2 | 今日画面: 業務開始/終了/再開、計測中業務と経過時間、終業目安・残り時間、業務ボタン（計測中を強調）＋休憩ボタン、その場で新規業務作成、当日の業務別累計、バックアップ注意表示 | B | 完了 | B1 | src/ui/screens/TodayScreen.tsx, components/ |
+| B3 | 集計画面: 日/週/月切替と前後移動、業務別合計表、日次は±分補正入力と切り替え履歴（時刻・業務） | B | 修正中 | B1 | src/ui/screens/SummaryScreen.tsx |
+| B4 | 業務管理画面（改名・非表示/再表示・上下並べ替え）、データ画面（書き出し/読み込み・最終バックアップ日時・「データはこの端末のブラウザにのみ保存」の説明）、打刻忘れダイアログ | B | 修正中 | B1 | src/ui/screens/TasksScreen.tsx, DataScreen.tsx |
+| B5 | fakeStore → 実Store差し替え（`main.tsx`）、`dev/` 削除、375px 幅確認 | B | 完了 | A5, B2-B4 | src/main.tsx, src/ui/dev/ |
 | L3 | 統合確認: 要件定義 §7 受け入れ条件の全項目チェック、dist の外部参照 grep、デプロイ、ユーザーへ提示 | L | 未着手 | 全タスク | - |
 
 ## 要相談 / 申し送り
@@ -52,3 +52,15 @@
   - リポジトリ: https://github.com/fewlio-LLUNA/ashiato-memory
   - 公開URL: https://fewlio-lluna.github.io/ashiato-memory/ （main への push ごとに Actions で検査→デプロイ）
   - **push はリーダーがレビュー巡回で行う。ワーカーはコミットまでで push しない**（未レビューのコードが本番に出るのを防ぐため）
+- 【巡回レビュー1回目・リーダーより 2026-10-21】typecheck / lint / test(125件) / build / dist 外部URL検査はすべて通過
+  - **合格→完了**: A1〜A5、B1、B2、B5（375px の実機幅確認は L3 でリーダーも行う）
+  - ※ L1 の状態が「未着手」に戻っていたので「完了」に直した。ボードを書き換えるときは、直前に読み直してから自分の行だけ変えること
+  - **B3 差し戻し（修正中）** `src/ui/components/AdjustInput.tsx` / `SummaryTable.tsx`
+    1. `onCommit` が false（DomainError。例: 実測10分に -999 を入力）を返しても、入力欄に却下された値が残ったままになる。ストアの値と表示がずれるので、失敗時は `draft` を `String(value)` に戻すこと
+    2. `AdjustInput` の key が `${taskId}:${adjustmentMinutes}` なので、日付を移動しても入力途中の値が別の日に持ち越される。key に `editor.date` を含めること
+    - 上の2点を確かめるテストを `SummaryScreen.test.tsx` に追加すること
+  - **B4 差し戻し（修正中）** `src/ui/screens/downloadFile.ts`
+    1. `link.click()` の直後に同期的に `URL.revokeObjectURL` を呼んでいる。iOS Safari などではダウンロードが始まる前に URL が無効になり、書き出しに失敗することがある。`setTimeout` で遅らせて解放すること（遅延時間は定数に切り出す）
+  - 対応しなくても合格扱いにする指摘（任意）:
+    - A: `resumeDay` で打刻忘れが残っているときのエラー文が「すでに勤務中です。」になっていて意味がずれる。`createAppStore` は30行目安を大きく超えている（クロージャ構成なので許容）
+    - B: アイコンの `size={18|20|24}` が各所に直書きされている。サイズ定数にまとめると望ましい

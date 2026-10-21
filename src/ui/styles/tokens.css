@@ -1,0 +1,48 @@
+/* デザイントークン。色・余白・角丸・タップ領域はここで一元管理する。 */
+:root {
+  /* 基調色: 群青と赤 */
+  --color-primary: #1e3a8a;
+  --color-primary-dark: #172b66;
+  --color-primary-soft: #e8edf8;
+  --color-accent: #c8102e;
+  --color-accent-dark: #9f0d25;
+  --color-accent-soft: #fbe9ec;
+
+  /* 面・文字・罫線 */
+  --color-bg: #f4f6fa;
+  --color-surface: #ffffff;
+  --color-text: #1b2233;
+  --color-text-muted: #5b6577;
+  --color-border: #cfd6e4;
+  --color-on-primary: #ffffff;
+
+  /* 休憩ボタン用（業務ボタンと見た目で区別する） */
+  --color-break: #5b6577;
+  --color-break-soft: #eceff4;
+
+  /* 余白 */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+
+  /* 角丸は最大 4px */
+  --radius: 4px;
+
+  /* タップ領域は 44px 以上 */
+  --tap-size: 44px;
+  --tap-size-large: 64px;
+
+  /* 文字 */
+  --font-family: system-ui, -apple-system, 'Segoe UI', 'Hiragino Sans', 'Yu Gothic UI', Meiryo, sans-serif;
+  --font-size-base: 16px;
+  --font-size-small: 13px;
+  --font-size-large: 20px;
+  --font-size-timer: 36px;
+
+  /* レイアウト */
+  --content-max-width: 720px;
+  --nav-height: 56px;
+}

@@ -1,6 +1,8 @@
-// 仮エントリ（L1）。B1/B5 で App と AppStore の接続に書き換える。
+// B5 で fakeStore を createAppStore() に差し替える。
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
+import { App } from './ui/App';
+import { createFakeStore } from './ui/dev/fakeStore';
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {
@@ -9,6 +11,6 @@ if (!rootElement) {
 
 createRoot(rootElement).render(
   <StrictMode>
-    <p>あしあとメモリー（準備中）</p>
+    <App store={createFakeStore()} />
   </StrictMode>,
 );

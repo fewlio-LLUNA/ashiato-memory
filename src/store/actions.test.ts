@@ -116,6 +116,10 @@ describe('clockOut / resumeDay', () => {
     ]);
   });
 
+  it('打刻忘れが残っていれば未確定である旨のエラーにする', () => {
+    expect(() => resumeDay(working(), NEXT_DAY_MORNING)).toThrow('未確定');
+  });
+
   it('当日の記録がない・勤務中なら再開は DomainError', () => {
     expect(() => resumeDay(createInitialData(), T0)).toThrow(DomainError);
     expect(() => resumeDay(working(), T0 + MIN)).toThrow(DomainError);

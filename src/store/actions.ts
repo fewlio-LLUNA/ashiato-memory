@@ -18,6 +18,8 @@ import {
 import { findStaleDay, getActiveDay, summarizeDay } from '../domain/summary';
 import { toDateKey } from '../domain/time';
 
+const STALE_DAY_MESSAGE = '前の日の終了時刻が未確定です。先に終了時刻を入力してください。';
+
 /** 初期データ（庶務のみ） */
 export function createInitialData(): AppData {
   const general: Task = { id: GENERAL_TASK_ID, name: GENERAL_TASK_NAME, archived: false, order: 0 };
@@ -45,7 +47,7 @@ function closeCurrent(segments: Segment[], now: EpochMs): Segment[] {
 /** 勤務中の日を返す。なければ・打刻忘れなら DomainError */
 function requireWorkingDay(data: AppData, now: EpochMs): WorkDay {
   if (findStaleDay(data, now) !== null) {
-    throw new DomainError('前の日の終了時刻が未確定です。先に終了時刻を入力してください。');
+    throw new DomainError(STALE_DAY_MESSAGE);
   }
   const day = getActiveDay(data);
   if (day === null) throw new DomainError('勤務中ではありません。先に出勤を記録してください。');
@@ -67,7 +69,7 @@ function requireNotGeneral(id: TaskId): void {
 /** 出勤。当日の WorkDay を作成し庶務の計測を始める */
 export function clockIn(data: AppData, now: EpochMs): AppData {
   if (findStaleDay(data, now) !== null) {
-    throw new DomainError('前の日の終了時刻が未確定です。先に終了時刻を入力してください。');
+    throw new DomainError(STALE_DAY_MESSAGE);
   }
   if (getActiveDay(data) !== null) throw new DomainError('すでに勤務中です。');
   const date = toDateKey(now);
@@ -105,9 +107,8 @@ export function clockOut(data: AppData, now: EpochMs): AppData {
 
 /** 当日の終業済みを勤務中に戻す。終業〜再開の間は記録しない */
 export function resumeDay(data: AppData, now: EpochMs): AppData {
-  if (findStaleDay(data, now) !== null || getActiveDay(data) !== null) {
-    throw new DomainError('すでに勤務中です。');
-  }
+  if (findStaleDay(data, now) !== null) throw new DomainError(STALE_DAY_MESSAGE);
+  if (getActiveDay(data) !== null) throw new DomainError('すでに勤務中です。');
   const day = data.days[toDateKey(now)];
   if (day === undefined || day.clockOut === null) throw new DomainError('再開できる今日の記録がありません。');
   if (now < day.clockOut) throw new DomainError('終了時刻より前には再開できません。');

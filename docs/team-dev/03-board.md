@@ -26,8 +26,8 @@
 |----|------|------|------|------|------------------|
 | L1 | 土台: git init、Vite+React+TS(strict)、ESLint、Vitest、npm scripts（dev/build/test/lint/typecheck）、`src/shared/` に設計書§4の型・定数を書き起こし、各レイヤーの空ディレクトリ、`main.tsx` の仮エントリ | L | 未着手 | - | package.json, tsconfig, vite.config.ts, src/shared/** |
 | L2 | 本番ビルド時のCSP注入（外部通信遮断）、GitHub Actions で test→build→Pages デプロイ。リポジトリ作成・push はユーザー確認後 | L | 完了 | L1 | vite.config.ts, .github/workflows/deploy.yml |
-| A1 | Domain: `time.ts`（日付キー・週/月範囲・区間長）＋テスト | A | 作業中 | L1 | src/domain/time.ts |
-| A2 | Domain: `summary.ts`（日次/期間集計・最大剰余法の丸め・getActiveDay・findStaleDay）＋テスト | A | 未着手 | A1 | src/domain/summary.ts |
+| A1 | Domain: `time.ts`（日付キー・週/月範囲・区間長）＋テスト | A | レビュー待ち | L1 | src/domain/time.ts |
+| A2 | Domain: `summary.ts`（日次/期間集計・最大剰余法の丸め・getActiveDay・findStaleDay）＋テスト | A | 作業中 | A1 | src/domain/summary.ts |
 | A3 | Domain: `flex.ts`（終業目安）、`format.ts`（表示整形）＋テスト | A | 未着手 | A1 | src/domain/flex.ts, format.ts |
 | A4 | Store: `actions.ts`（打刻・切替・業務CRUD・補正・打刻忘れ・再開の純粋更新関数とバリデーション）＋テスト | A | 未着手 | A1 | src/store/actions.ts |
 | A5 | Store: `persistence.ts`（localStorage・破損時退避・storageイベント）、`backup.ts`（入出力検証・最終バックアップ日時）、`createAppStore.ts` 組み立て＋テスト | A | 未着手 | A4 | src/store/** |

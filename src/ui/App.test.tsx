@@ -3,7 +3,7 @@ import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { App } from './App';
-import { createFakeStore } from './dev/fakeStore';
+import { createTestStore } from './testing/createTestStore';
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -26,12 +26,12 @@ afterEach(() => {
 
 describe('App', () => {
   it('打刻忘れがなければダイアログを出さない', () => {
-    act(() => root.render(<App store={createFakeStore()} />));
+    act(() => root.render(<App store={createTestStore()} />));
     expect(container.querySelector('[role="dialog"]')).toBeNull();
   });
 
   it('前日から勤務中のままならダイアログを出し、確定すると消える', () => {
-    const store = createFakeStore();
+    const store = createTestStore();
     const yesterday = Date.now() - MS_PER_DAY;
     store.clockIn(yesterday);
     act(() => root.render(<App store={store} />));

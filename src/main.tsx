@@ -1,8 +1,7 @@
-// B5 で fakeStore を createAppStore() に差し替える。
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
+import { createAppStore } from './store/createAppStore';
 import { App } from './ui/App';
-import { createFakeStore } from './ui/dev/fakeStore';
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {
@@ -11,6 +10,6 @@ if (!rootElement) {
 
 createRoot(rootElement).render(
   <StrictMode>
-    <App store={createFakeStore()} />
+    <App store={createAppStore()} />
   </StrictMode>,
 );

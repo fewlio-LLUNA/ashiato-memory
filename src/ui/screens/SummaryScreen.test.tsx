@@ -2,7 +2,7 @@
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { createFakeStore } from '../dev/fakeStore';
+import { createTestStore } from '../testing/createTestStore';
 import { SummaryScreen } from './SummaryScreen';
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
@@ -37,12 +37,12 @@ afterEach(() => {
 
 describe('SummaryScreen', () => {
   it('記録のない日は「記録はありません」を出す', () => {
-    act(() => root.render(<SummaryScreen store={createFakeStore()} />));
+    act(() => root.render(<SummaryScreen store={createTestStore()} />));
     expect(container.textContent).toContain('この期間の記録はありません');
   });
 
   it('日次で補正を入れると合計に反映され、切り替え履歴が出る', () => {
-    const store = createFakeStore();
+    const store = createTestStore();
     store.clockIn();
     act(() => root.render(<SummaryScreen store={store} />));
     expect(container.textContent).toContain('切り替え履歴');
@@ -56,7 +56,7 @@ describe('SummaryScreen', () => {
   });
 
   it('週に切り替えると補正は入力欄ではなく表示になり、履歴は出ない', () => {
-    const store = createFakeStore();
+    const store = createTestStore();
     store.clockIn();
     act(() => root.render(<SummaryScreen store={store} />));
     const weekButton = [...container.querySelectorAll('button')].find((b) => b.textContent === '週');

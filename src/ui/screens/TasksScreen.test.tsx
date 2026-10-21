@@ -2,7 +2,7 @@
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { createFakeStore } from '../dev/fakeStore';
+import { createTestStore } from '../testing/createTestStore';
 import { TasksScreen } from './TasksScreen';
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
@@ -35,7 +35,7 @@ afterEach(() => {
 
 describe('TasksScreen', () => {
   it('非表示にすると「非表示中」になり、再表示で戻る', () => {
-    const store = createFakeStore();
+    const store = createTestStore();
     store.createTask('資料作成');
     act(() => root.render(<TasksScreen store={store} />));
     act(() => button('非表示').click());
@@ -45,7 +45,7 @@ describe('TasksScreen', () => {
   });
 
   it('下へ移動すると並び順が入れ替わる', () => {
-    const store = createFakeStore();
+    const store = createTestStore();
     store.createTask('資料作成');
     act(() => root.render(<TasksScreen store={store} />));
     expect(rowNames()).toEqual(['庶務', '資料作成']);
@@ -54,7 +54,7 @@ describe('TasksScreen', () => {
   });
 
   it('庶務には名前変更・非表示ボタンが出ない', () => {
-    const store = createFakeStore();
+    const store = createTestStore();
     act(() => root.render(<TasksScreen store={store} />));
     const labels = [...container.querySelectorAll('button')].map((b) => b.textContent);
     expect(labels).not.toContain('名前変更');

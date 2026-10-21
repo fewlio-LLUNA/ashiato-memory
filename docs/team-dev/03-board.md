@@ -45,3 +45,7 @@
   - `tsconfig.app.json` は strict に加えて `noUncheckedIndexedAccess` / `noUnusedLocals` / `noUnusedParameters` が有効。配列・Record の添字アクセスは `T | undefined` になる点に注意
   - テストは `src/**/*.test.{ts,tsx}`、既定の環境は `node`。DOM が必要なテストはファイル先頭に `// @vitest-environment jsdom`（jsdom 導入済み）。`@testing-library/*` は未導入（必要なら要相談）
   - 改行は LF（`.gitattributes`）。コミット前に `npm run typecheck && npm run lint && npm test` を通すこと
+- 【L2 途中・リーダーより】本番ビルドに CSP を注入済み（`script-src 'self'; style-src 'self'; connect-src 'none'` ほか）。B への注意:
+  - `<style>` タグや HTML 文字列での `style="..."` は本番で無効になる。スタイルは `src/ui/styles/*.css` を import する。JSX の `style={{...}}` は可（CSSOM 経由のため）
+  - 外部 URL（フォント・画像・CDN）は一切参照しない。画像は SVG コンポーネントか `data:` のみ
+  - GitHub への公開（リポジトリ作成・push・Pages 有効化）はユーザー確認待ち

@@ -17,13 +17,17 @@ const INVALID_MESSAGE = '補正は整数の分で入力してください（例:
 export function AdjustInput({ taskName, value, onCommit, onInvalid }: AdjustInputProps): ReactElement {
   const [draft, setDraft] = useState(String(value));
 
+  const revert = (): void => setDraft(String(value));
+
+  /** 却下された値を入力欄に残さない。表示は常にストアの値と一致させる。 */
   const commit = (): void => {
     const minutes = Number(draft);
     if (draft.trim() === '' || !Number.isInteger(minutes)) {
       onInvalid(INVALID_MESSAGE);
+      revert();
       return;
     }
-    if (minutes !== value) onCommit(minutes);
+    if (minutes !== value && !onCommit(minutes)) revert();
   };
 
   return (

@@ -4,6 +4,7 @@ import type { EpochMs } from '../../shared/types';
 
 const BACKUP_FILE_PREFIX = 'ashiatomemory-backup';
 const JSON_MIME = 'application/json';
+const REVOKE_DELAY_MS = 10_000;
 
 /** "ashiatomemory-backup-2026-10-21-0905.json" 形式のファイル名。 */
 export function backupFileName(now: EpochMs): string {
@@ -18,5 +19,6 @@ export function downloadJson(fileName: string, content: string): void {
   link.href = url;
   link.download = fileName;
   link.click();
-  URL.revokeObjectURL(url);
+  // iOS Safari などはダウンロード開始前に URL が無効になると失敗するため、遅らせて解放する
+  window.setTimeout(() => URL.revokeObjectURL(url), REVOKE_DELAY_MS);
 }

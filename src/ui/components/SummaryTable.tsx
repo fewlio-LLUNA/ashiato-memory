@@ -27,7 +27,7 @@ function AdjustCell({ data, row, editor }: { data: AppData; row: TaskTotal; edit
   return (
     <td className="num">
       <AdjustInput
-        key={`${row.taskId}:${row.adjustmentMinutes}`}
+        key={`${editor.date}:${row.taskId}:${row.adjustmentMinutes}`}
         taskName={taskNameOf(data, row.taskId)}
         value={row.adjustmentMinutes}
         onCommit={(minutes) => editor.onCommit(row.taskId, minutes)}

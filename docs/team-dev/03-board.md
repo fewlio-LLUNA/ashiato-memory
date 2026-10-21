@@ -4,7 +4,7 @@
 > 更新したら即コミット（`docs: ボード更新`）。各ワーカーは**自分の行だけ**書き換える。
 > 構造変更（タスク追加・境界変更・要相談の裁定）はリーダーOpusが行う。
 
-最終更新: メインOpus 2026-10-21
+最終更新: リーダーOpus 2026-10-21（L1 完了）
 
 ## ファイルオーナーシップ（並行作業の境界）
 - **Sonnet A**: `src/domain/**`, `src/store/**`
@@ -25,7 +25,7 @@
 | ID | 内容 | 担当 | 状態 | 依存 | 主な対象ファイル |
 |----|------|------|------|------|------------------|
 | L1 | 土台: git init、Vite+React+TS(strict)、ESLint、Vitest、npm scripts（dev/build/test/lint/typecheck）、`src/shared/` に設計書§4の型・定数を書き起こし、各レイヤーの空ディレクトリ、`main.tsx` の仮エントリ | L | 未着手 | - | package.json, tsconfig, vite.config.ts, src/shared/** |
-| L2 | 本番ビルド時のCSP注入（外部通信遮断）、GitHub Actions で test→build→Pages デプロイ。リポジトリ作成・push はユーザー確認後 | L | 未着手 | L1 | vite.config.ts, .github/workflows/deploy.yml |
+| L2 | 本番ビルド時のCSP注入（外部通信遮断）、GitHub Actions で test→build→Pages デプロイ。リポジトリ作成・push はユーザー確認後 | L | 作業中 | L1 | vite.config.ts, .github/workflows/deploy.yml |
 | A1 | Domain: `time.ts`（日付キー・週/月範囲・区間長）＋テスト | A | 未着手 | L1 | src/domain/time.ts |
 | A2 | Domain: `summary.ts`（日次/期間集計・最大剰余法の丸め・getActiveDay・findStaleDay）＋テスト | A | 未着手 | A1 | src/domain/summary.ts |
 | A3 | Domain: `flex.ts`（終業目安）、`format.ts`（表示整形）＋テスト | A | 未着手 | A1 | src/domain/flex.ts, format.ts |
@@ -40,4 +40,8 @@
 
 ## 要相談 / 申し送り
 > 境界をまたぐ変更、契約の変更提案、ブロッカーをここに起票。リーダーが裁定して解消。
-- （なし）
+- 【L1 完了・リーダーより】Sonnet A・B は着手してください。土台の前提:
+  - 版: Vite 8 / React 18.3 / TypeScript 6 / Vitest 5 / ESLint 10（typescript-eslint 8）
+  - `tsconfig.app.json` は strict に加えて `noUncheckedIndexedAccess` / `noUnusedLocals` / `noUnusedParameters` が有効。配列・Record の添字アクセスは `T | undefined` になる点に注意
+  - テストは `src/**/*.test.{ts,tsx}`、既定の環境は `node`。DOM が必要なテストはファイル先頭に `// @vitest-environment jsdom`（jsdom 導入済み）。`@testing-library/*` は未導入（必要なら要相談）
+  - 改行は LF（`.gitattributes`）。コミット前に `npm run typecheck && npm run lint && npm test` を通すこと

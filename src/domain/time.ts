@@ -2,6 +2,9 @@ import type { DateKey, EpochMs, Segment } from '../shared/types';
 
 const DAYS_PER_WEEK = 7;
 const PAD_WIDTH = 2;
+const MAX_HOUR = 23;
+const MAX_MINUTE = 59;
+const CLOCK_PATTERN = /^(\d{2}):(\d{2})$/;
 
 interface DateParts {
   year: number;
@@ -61,4 +64,32 @@ export function monthRange(date: DateKey): { from: DateKey; to: DateKey } {
 /** 区間の長さ(ms)。計測中（end が null）は now まで。負にはならない */
 export function segmentMs(seg: Segment, now: EpochMs): number {
   return Math.max(0, (seg.end ?? now) - seg.start);
+}
+
+/** base のローカル日付で "HH:MM" の時刻（秒・ms は 0）にする。形式不正・範囲外は null */
+export function withClockTime(base: EpochMs, hhmm: string): EpochMs | null {
+  const match = CLOCK_PATTERN.exec(hhmm);
+  if (!match) return null;
+  const hour = Number(match[1]);
+  const minute = Number(match[2]);
+  if (hour > MAX_HOUR || minute > MAX_MINUTE) return null;
+  const d = new Date(base);
+  d.setHours(hour, minute, 0, 0);
+  return d.getTime();
+}
+
+/** month を含む暦月を月曜始まりの週ごとに並べる。月外のマスは null */
+export function calendarWeeks(month: DateKey): (DateKey | null)[][] {
+  const { year, month: m } = parseKey(month);
+  const first = formatKey(year, m, 1);
+  const lastDay = new Date(year, m, 0).getDate();
+  const leading = (keyToLocalDate(first).getDay() + DAYS_PER_WEEK - 1) % DAYS_PER_WEEK;
+  const cells: (DateKey | null)[] = Array.from({ length: leading }, () => null);
+  for (let day = 1; day <= lastDay; day++) cells.push(formatKey(year, m, day));
+  while (cells.length % DAYS_PER_WEEK !== 0) cells.push(null);
+  const weeks: (DateKey | null)[][] = [];
+  for (let i = 0; i < cells.length; i += DAYS_PER_WEEK) {
+    weeks.push(cells.slice(i, i + DAYS_PER_WEEK));
+  }
+  return weeks;
 }

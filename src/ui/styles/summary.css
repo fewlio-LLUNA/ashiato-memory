@@ -201,16 +201,21 @@ button.period__label {
 /*
  * 幅が狭い画面で補正を編集できる表は、1業務を2段にする。
  * 1段目: 業務名・実測・合計、2段目: 補正（「−」ボタン＋入力欄）。
+ * 実測・合計は固定幅の列にして、見出しと全行で縦に揃える。
  * 横に4列並べると、入力欄が潰れたり実測・合計と重なったりするため。
  */
-@media (max-width: 600px) {
+@media (max-width: 640px) {
+  .summary-table--editable {
+    --num-col: 5.75rem;
+  }
+
   .summary-table--editable thead th.summary-table__adjust {
     display: none;
   }
 
   .summary-table--editable tr {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto auto;
+    grid-template-columns: minmax(0, 1fr) var(--num-col) var(--num-col);
     column-gap: var(--space-3);
     border-bottom: 1px solid var(--color-border);
   }
@@ -218,6 +223,7 @@ button.period__label {
   .summary-table--editable th,
   .summary-table--editable td {
     border-bottom: 0;
+    font-variant-numeric: tabular-nums;
   }
 
   .summary-table--editable tbody th {

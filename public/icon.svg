@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- あしあとメモリー アイコン原画（設計書 §8.1）。群青の背景に白い足跡と時計、赤い針 -->
+  <rect width="512" height="512" fill="#1E3A8A"/>
+  <!-- 時計: 白い文字盤の枠と赤い針 -->
+  <g transform="translate(334 176)">
+    <circle r="112" fill="none" stroke="#fff" stroke-width="26"/>
+    <g stroke="#C8102E" stroke-width="22" stroke-linecap="round">
+      <line x1="0" y1="0" x2="0" y2="-70"/>
+      <line x1="0" y1="0" x2="52" y2="30"/>
+    </g>
+    <circle r="16" fill="#C8102E"/>
+  </g>
+  <!-- 足跡: 左下から右上へ歩く2歩 -->
+  <g fill="#fff">
+    <g transform="translate(128 404) rotate(-30) scale(1.12)">
+      <ellipse cx="0" cy="0" rx="34" ry="50"/>
+      <circle cx="-26" cy="-66" r="11"/>
+      <circle cx="-6" cy="-76" r="11"/>
+      <circle cx="16" cy="-74" r="10"/>
+      <circle cx="33" cy="-62" r="9"/>
+    </g>
+    <g transform="translate(208 312) rotate(-30) scale(1.12)">
+      <ellipse cx="0" cy="0" rx="34" ry="50"/>
+      <circle cx="-33" cy="-62" r="9"/>
+      <circle cx="-16" cy="-74" r="10"/>
+      <circle cx="6" cy="-76" r="11"/>
+      <circle cx="26" cy="-66" r="11"/>
+    </g>
+  </g>
+</svg>

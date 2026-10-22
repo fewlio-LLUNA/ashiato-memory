@@ -25,7 +25,7 @@ function signed(minutes: number): string {
 function AdjustCell({ data, row, editor }: { data: AppData; row: TaskTotal; editor?: AdjustEditor }): ReactElement {
   if (!editor) return <td className="num">{signed(row.adjustmentMinutes)}</td>;
   return (
-    <td className="num">
+    <td className="num summary-table__adjust">
       <AdjustInput
         key={`${editor.date}:${row.taskId}:${row.adjustmentMinutes}`}
         taskName={taskNameOf(data, row.taskId)}
@@ -41,12 +41,12 @@ function AdjustCell({ data, row, editor }: { data: AppData; row: TaskTotal; edit
 export function SummaryTable({ data, rows, editor }: SummaryTableProps): ReactElement {
   if (rows.length === 0) return <p className="muted">この期間の記録はありません。</p>;
   return (
-    <table className="summary-table">
+    <table className={editor ? 'summary-table summary-table--editable' : 'summary-table'}>
       <thead>
         <tr>
           <th scope="col">業務</th>
           <th scope="col" className="num">実測</th>
-          <th scope="col" className="num">補正</th>
+          <th scope="col" className="num summary-table__adjust">補正</th>
           <th scope="col" className="num">合計</th>
         </tr>
       </thead>

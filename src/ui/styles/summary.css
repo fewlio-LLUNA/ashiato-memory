@@ -162,6 +162,7 @@ button.period__label {
 
 .adjust {
   display: flex;
+  justify-content: flex-end;
   gap: var(--space-1);
 }
 
@@ -187,8 +188,8 @@ button.period__label {
 
 .adjust-input {
   flex: 1 1 auto;
-  width: 3rem;
-  min-width: 0;
+  width: 3.5rem;
+  min-width: 3.5rem;
   min-height: var(--tap-size);
   padding: 0 var(--space-2);
   border: 1px solid var(--color-border);
@@ -196,3 +197,56 @@ button.period__label {
   text-align: right;
 }
 
+
+/*
+ * 幅が狭い画面で補正を編集できる表は、1業務を2段にする。
+ * 1段目: 業務名・実測・合計、2段目: 補正（「−」ボタン＋入力欄）。
+ * 横に4列並べると、入力欄が潰れたり実測・合計と重なったりするため。
+ */
+@media (max-width: 600px) {
+  .summary-table--editable thead th.summary-table__adjust {
+    display: none;
+  }
+
+  .summary-table--editable tr {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    column-gap: var(--space-3);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .summary-table--editable th,
+  .summary-table--editable td {
+    border-bottom: 0;
+  }
+
+  .summary-table--editable tbody th {
+    width: auto;
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .summary-table--editable td:nth-child(2) {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .summary-table--editable td:nth-child(4) {
+    grid-column: 3;
+    grid-row: 1;
+  }
+
+  .summary-table--editable tbody td.summary-table__adjust {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .summary-table--editable tbody td.summary-table__adjust::before {
+    content: '補正（分）';
+    font-size: var(--font-size-small);
+    color: var(--color-text-muted);
+  }
+}

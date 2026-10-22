@@ -43,7 +43,7 @@
 | A6 | F19 Store: `actions.editSegment`（§4.3 の検証順）と `createAppStore` への配線＋テスト | A | 完了 | L4 | src/store/actions.ts, createAppStore.ts |
 | A7 | 改訂1 Domain: `time.ts` に `withClockTime`・`calendarWeeks`（§4.2）＋テスト（月曜始まり・月初が日曜の月・2月・不正な "HH:MM"） | A | 完了 | - | src/domain/time.ts |
 | B7 | F17 バックアップ注意を今日画面から外しデータ画面へ（§8.3）＋テスト | B | 完了 | - | TodayScreen.tsx, DataScreen.tsx, BackupNotice.tsx |
-| B8 | F16 補正欄の「−」トグル（§8.2）＋テスト（トグルで負の値が確定・却下時に戻る・PCの "-10" 直接入力） | B | 修正中 | - | components/AdjustInput.tsx, summary.css |
+| B8 | F16 補正欄の「−」トグル（§8.2）＋テスト（トグルで負の値が確定・却下時に戻る・PCの "-10" 直接入力） | B | レビュー待ち | - | components/AdjustInput.tsx, summary.css |
 | B9 | F18 集計「日」のカレンダー（§8.4）＋テスト（記録日の印・選択で日付移動・未来日は押せない） | B | 完了 | A7 | components/MonthCalendar.tsx, SummaryScreen.tsx |
 | B10 | F19 履歴編集 UI（§8.5）: `SegmentHistory` の編集モード、今日画面への履歴（折りたたみ）追加＋テスト | B | 完了 | L4, A6, A7 | components/SegmentHistory.tsx, TodayScreen.tsx, SummaryScreen.tsx |
 | L6 | 改訂1 統合確認: 要件 §7 の（改訂1）9項目を確認、dist の外部参照 grep、デプロイ、ユーザーへ提示（iPhone 実機のアイコン確認はユーザーに依頼） | L | 完了 | 改訂1全タスク | - |

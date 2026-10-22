@@ -11,6 +11,9 @@ import { SummaryScreen } from './SummaryScreen';
 
 const HOUR_MS = 60 * 60 * 1000;
 const MS_PER_DAY = 24 * HOUR_MS;
+// 実行時刻で結果が変わらないよう、月の中ほどの日中に固定する
+// （深夜は「2時間前に出勤」が前日になり、23時台は前日の退勤が日をまたぐ。月初・月末はカレンダーの表示が変わる）
+const FIXED_NOW = new Date(2026, 9, 22, 12, 0);
 
 let container: HTMLDivElement;
 let root: Root;
@@ -30,6 +33,8 @@ function commitWithEnter(input: HTMLInputElement): void {
 }
 
 beforeEach(() => {
+  vi.useFakeTimers({ toFake: ['Date'] });
+  vi.setSystemTime(FIXED_NOW);
   container = document.createElement('div');
   document.body.appendChild(container);
   root = createRoot(container);
@@ -38,6 +43,7 @@ beforeEach(() => {
 afterEach(() => {
   act(() => root.unmount());
   container.remove();
+  vi.useRealTimers();
 });
 
 describe('SummaryScreen', () => {
@@ -165,16 +171,6 @@ describe('SummaryScreen', () => {
   });
 
   describe('カレンダー', () => {
-    // 月初・月末で結果が変わらないよう、時刻を月の中ほどに固定する
-    beforeEach(() => {
-      vi.useFakeTimers({ toFake: ['Date'] });
-      vi.setSystemTime(new Date(2026, 9, 22, 12, 0));
-    });
-
-    afterEach(() => {
-      vi.useRealTimers();
-    });
-
     function openCalendar(): void {
       const label = container.querySelector('button.period__label') as HTMLButtonElement;
       act(() => label.click());

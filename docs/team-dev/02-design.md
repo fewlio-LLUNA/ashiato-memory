@@ -3,8 +3,8 @@
 > `/design-handoff` の成果物。3セッション（Sonnet A / Sonnet B / リーダーOpus）が共通の地図として読む。
 > 要件定義書 `01-requirements.md` を入力とする。
 
-最終更新: 2026-10-21
-ステータス: **承認済み**（2026-10-21）
+最終更新: 2026-10-22
+ステータス: **承認済み**（初版 2026-10-21／改訂1 2026-10-22。改訂1の要点は §8）
 
 ## 1. アーキテクチャ概要
 
@@ -125,6 +125,12 @@ export interface AppData {
 
 export type SwitchTarget = { kind: 'task'; taskId: TaskId } | { kind: 'break' };
 
+/** 改訂1 F19: 切り替え履歴1行の編集内容。変更しない項目も現在値を入れて渡す */
+export interface SegmentEdit {
+  start: EpochMs;        // その行の開始時刻（直前の行の end も同じ値になる）
+  target: SwitchTarget;  // その行の業務または休憩
+}
+
 export interface TaskTotal {
   taskId: TaskId;
   measuredMinutes: number;    // 実測（丸め後）
@@ -181,6 +187,9 @@ export interface AppStore {
   // 補正
   setAdjustment(date: DateKey, taskId: TaskId, minutes: number): void;
 
+  // 履歴編集（改訂1 F19）。index は day.segments の添字。開始時刻と対象を1回で原子的に更新する
+  editSegment(date: DateKey, index: number, edit: SegmentEdit, now?: EpochMs): void;
+
   // バックアップ
   exportJson(now?: EpochMs): string; // 呼んだ時刻を最終バックアップ日時として記録
   importJson(json: string): void;    // 検証NGなら DomainError、データは変更しない
@@ -196,6 +205,9 @@ export function weekRange(date: DateKey): { from: DateKey; to: DateKey };  // �
 export function monthRange(date: DateKey): { from: DateKey; to: DateKey };
 export function addDays(date: DateKey, n: number): DateKey;
 export function segmentMs(seg: Segment, now: EpochMs): number;            // end null は now まで
+// 改訂1
+export function withClockTime(base: EpochMs, hhmm: string): EpochMs | null; // base のローカル日付で "HH:MM" の時刻（秒・ms は0）。形式不正なら null
+export function calendarWeeks(month: DateKey): (DateKey | null)[][];       // month を含む暦月を月曜始まりの週ごとに。月外のマスは null
 
 // summary.ts
 export function summarizeDay(day: WorkDay, now: EpochMs): DaySummary;
@@ -225,6 +237,13 @@ export function formatDateLabel(date: DateKey): string; // "10/21(火)"
 - **setAdjustment**: その業務の `measured + minutes < 0` になる値は DomainError。0 を設定したらキーを削除。
 - **永続化**: 状態変更のたびに同期保存。`storage` イベントで他タブの変更を取り込み subscribe 通知。保存データが壊れていたら初期データで起動し、壊れたデータを `ashiatomemory:v1:corrupt-<時刻>` に退避。
 - **importJson**: `schemaVersion` と構造を検証してから丸ごと置換。
+- **editSegment（改訂1）**: 次の順で検証し、どれか NG なら DomainError（データは変えない）。
+  1. その日の記録がある／`0 <= index < segments.length`
+  2. `index = 0` のとき `start` は現在の start と同じ（業務開始時刻は変えられない）。違えば「先頭の行の開始時刻（業務開始）は変更できません。」
+  3. `index >= 1` のとき `segments[index-1].start < start < (segments[index].end ?? now)`、かつ `start <= now`。NG の文言は「直前の行の開始（HH:MM）より後にしてください。」「この行の終了（HH:MM）より前にしてください。」「未来の時刻は指定できません。」のように理由が分かるもの
+  4. `target` が業務なら存在し非表示でない（ただし現在と同じ業務なら非表示でも可）
+  5. 更新後の日で、補正のある業務について `measured + adjustment >= 0`。NG なら「補正と合わせて0分未満になる業務があるため変更できません。」
+  - 更新内容: `segments[index].start = start`、`segments[index-1].end = start`、`segments[index]` の kind/taskId を target に。隣と同じ業務になっても区間は結合しない
 
 ### 4.4 共有定数（`src/shared/constants.ts`）
 ```ts
@@ -262,9 +281,50 @@ export const BACKUP_WARN_DAYS = 7;                              // これ以上�
 ## 7. リスクと対策
 | リスク | 対策 |
 |--------|------|
-| ブラウザのデータ削除で記録消失 | データ画面に最終バックアップ日時を表示し、`BACKUP_WARN_DAYS` 日以上空いたら今日画面に注意を出す（B）。日時は `AppData` とは別キー `LAST_BACKUP_KEY` に保存（A） |
+| ブラウザのデータ削除で記録消失 | データ画面に最終バックアップ日時を表示し、`BACKUP_WARN_DAYS` 日以上空いたら**データ画面に**注意を出す（B。改訂1で今日画面から移動）。日時は `AppData` とは別キー `LAST_BACKUP_KEY` に保存（A） |
 | 複数タブで同時に操作して上書き | `storage` イベントで再読込。操作は常に最新状態を読み直してから適用 |
 | 打刻忘れで翌日にまたがる | 起動時に `findStaleDay` で検出し、App 全体のダイアログで終了時刻を入力させる。確定まで打刻不可 |
 | A の完成前に B が動けない | fakeStore で並行開発。契約は L1 で型として先に固定 |
 | CSP が開発サーバーを壊す | CSP は本番ビルド時のみ注入 |
 | GitHub への公開作業 | リポジトリ作成・push・Pages 有効化は外部公開にあたるため、リーダーがユーザーに確認してから実施 |
+
+## 8. 改訂1（2026-10-22）の設計
+
+要件 F15〜F19。分担は初版と同じレイヤー分割（A=Domain/Store、B=UI、リーダー=土台・アイコン・統合）。
+
+### 8.1 F15 アプリアイコン（リーダー）
+- 図案: 群青 `#1E3A8A` の正方形背景に、白い足跡と赤 `#C8102E` の時計の針（またはその逆の配色）。角丸は付けない（iOS が自動で角を丸める）。絵文字・文字は使わない。
+- ファイル（Vite の `public/` に置き、相対パスで参照。`base: './'` のためルート絶対パスにしない）:
+  - `public/icon.svg` … 原画（ファビコンにも使う）
+  - `public/apple-touch-icon.png` … 180×180。原画からヘッドレス Chrome 等で書き出す。書き出し手順（コマンド）を `scripts/` か README に残し、再生成できるようにする
+- `index.html`: `<link rel="icon" href="./icon.svg" type="image/svg+xml">`、`<link rel="apple-touch-icon" href="./apple-touch-icon.png">`、`<meta name="apple-mobile-web-app-title" content="あしあと">`。インライン data: のファビコンは削除
+- CSP は `img-src 'self' data:` のままで足りる（同一オリジン）。外部通信は増えない
+
+### 8.2 F16 補正のマイナス切替（B）
+- `AdjustInput` に「−」のトグルボタン（`aria-pressed`）を付ける。入力欄は**絶対値**を持ち、確定値 = 符号 × 絶対値
+- 入力欄に `-` 付きで打たれた場合（PC）は、符号をトグルに移して絶対値を表示する（PCの直接入力も引き続き使える）
+- トグル押下で値が変わる場合は即確定（onCommit）。却下されたら符号・値ともストアの値に戻す（既存の revert と同じ方針）
+- タップ領域 44px 以上
+
+### 8.3 F17 バックアップ注意の移動（B）
+- `BackupNotice` を `TodayScreen` から外し、`DataScreen` に置く。データ画面ではリンク「データ画面で書き出す」は不要なので出さない（props で切り替えるか文言を分ける）
+- 既存の今日画面テストで注意表示を確認している箇所があれば、データ画面側のテストへ移す
+
+### 8.4 F18 カレンダー（B が UI、A が `calendarWeeks`）
+- 集計画面の「日」モードで、日付ラベル（`period__label`）をボタンにし、押すと月カレンダーを開閉する
+- カレンダー: 月の前後移動、曜日見出し（月〜日）、各日をボタンに。`data.days[date]` がある日に印（色＋ドット等、色だけに頼らない）。今日と選択中の日を区別できる表示。未来の日は押せない
+- 日を選ぶと anchor をその日にしてカレンダーを閉じる。以降は既存の日表示（業務別合計・補正・切り替え履歴）がそのまま出る
+- 新しいコンポーネント例: `src/ui/components/MonthCalendar.tsx`。375px で7列が収まること
+
+### 8.5 F19 切り替え履歴の編集（A が Store、B が UI）
+- A: `actions.ts` に `editSegment(data, date, index, edit, now)`（§4.3 の検証順どおり）、`createAppStore` に配線、テスト（各エラー条件・境界値・計測中区間・補正との整合・隣接区間の end 追従）
+- B: `SegmentHistory` に編集モードを追加し、**今日画面（当日の履歴を新たに表示）と集計「日」の両方で使う**
+  - 各行に「編集」ボタン（SVG の鉛筆アイコン）。押すとその行が編集フォームになる: 時刻 `<input type="time">`（先頭行は無効化し「業務開始」と表示）、業務 `<select>`（アクティブ業務＋休憩。現在の業務が非表示なら選択肢に残す）、保存／キャンセル
+  - 時刻文字列 → EpochMs は `withClockTime(seg.start, hhmm)` を使う（UI で日付計算を書かない）
+  - 保存は `store.editSegment(...)` を1回。DomainError は既存の `useActionRunner` でそのまま表示し、フォームは開いたままにする
+  - 同時に編集できる行は1つ。日付移動時は編集状態を閉じる（B3 差し戻しと同じ持ち越し防止）
+  - 今日画面では履歴を折りたたみ（`<details>` 等）にし、業務ボタンの押しやすさを損なわない
+
+### 8.6 依存関係
+- L4（契約の書き起こし）→ A6・B10。A7 → B9・B10。A6 → B10
+- B7・B8 は依存なしで即着手可

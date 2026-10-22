@@ -4,7 +4,7 @@
 > 更新したら即コミット（`docs: ボード更新`）。各ワーカーは**自分の行だけ**書き換える。
 > 構造変更（タスク追加・境界変更・要相談の裁定）はリーダーOpusが行う。
 
-最終更新: メインOpus 2026-10-22（改訂1のタスク L4〜L6・A6〜A7・B7〜B10 を起票）
+最終更新: リーダーOpus 2026-10-22（巡回レビュー3回目: A6・A7・B7・B8・B9 合格、L4・L5 完了）
 
 ## ファイルオーナーシップ（並行作業の境界）
 - **Sonnet A**: `src/domain/**`, `src/store/**`
@@ -39,17 +39,22 @@
 | B6 | 改善（任意・受け入れ外）: 375px の集計表で数値「1時間30分」や業務名が途中で折り返されて読みにくい。数値列は `white-space: nowrap`、業務名は単語途中で切れないよう列幅・折り返しを調整 | B | 未着手 | - | src/ui/styles/summary.css |
 | L3 | 統合確認: 要件定義 §7 受け入れ条件の全項目チェック、dist の外部参照 grep、デプロイ、ユーザーへ提示 | L | 完了 | 全タスク | - |
 | L4 | 改訂1の契約: 設計書 §4.1 の `SegmentEdit` 型と `AppStore.editSegment` を `src/shared/types.ts` に書き起こす。fake 実装がないので型追加だけでビルドが落ちる場合は、A6 着手まで `createAppStore` に「未実装」DomainError を投げる仮メソッドを置いてよい（A に一言起票） | L | 完了 | - | src/shared/types.ts |
-| L5 | F15 アプリアイコン（設計書 §8.1）: `public/icon.svg`・`public/apple-touch-icon.png`(180px)・`index.html` のリンク差し替え・書き出し手順の保存 | L | 未着手 | - | public/**, index.html, scripts/ |
-| A6 | F19 Store: `actions.editSegment`（§4.3 の検証順）と `createAppStore` への配線＋テスト | A | レビュー待ち | L4 | src/store/actions.ts, createAppStore.ts |
-| A7 | 改訂1 Domain: `time.ts` に `withClockTime`・`calendarWeeks`（§4.2）＋テスト（月曜始まり・月初が日曜の月・2月・不正な "HH:MM"） | A | レビュー待ち | - | src/domain/time.ts |
-| B7 | F17 バックアップ注意を今日画面から外しデータ画面へ（§8.3）＋テスト | B | レビュー待ち | - | TodayScreen.tsx, DataScreen.tsx, BackupNotice.tsx |
-| B8 | F16 補正欄の「−」トグル（§8.2）＋テスト（トグルで負の値が確定・却下時に戻る・PCの "-10" 直接入力） | B | レビュー待ち | - | components/AdjustInput.tsx, summary.css |
-| B9 | F18 集計「日」のカレンダー（§8.4）＋テスト（記録日の印・選択で日付移動・未来日は押せない） | B | レビュー待ち | A7 | components/MonthCalendar.tsx, SummaryScreen.tsx |
-| B10 | F19 履歴編集 UI（§8.5）: `SegmentHistory` の編集モード、今日画面への履歴（折りたたみ）追加＋テスト | B | 未着手 | L4, A6, A7 | components/SegmentHistory.tsx, TodayScreen.tsx, SummaryScreen.tsx |
+| L5 | F15 アプリアイコン（設計書 §8.1）: `public/icon.svg`・`public/apple-touch-icon.png`(180px)・`index.html` のリンク差し替え・書き出し手順の保存 | L | 完了 | - | public/**, index.html, scripts/ |
+| A6 | F19 Store: `actions.editSegment`（§4.3 の検証順）と `createAppStore` への配線＋テスト | A | 完了 | L4 | src/store/actions.ts, createAppStore.ts |
+| A7 | 改訂1 Domain: `time.ts` に `withClockTime`・`calendarWeeks`（§4.2）＋テスト（月曜始まり・月初が日曜の月・2月・不正な "HH:MM"） | A | 完了 | - | src/domain/time.ts |
+| B7 | F17 バックアップ注意を今日画面から外しデータ画面へ（§8.3）＋テスト | B | 完了 | - | TodayScreen.tsx, DataScreen.tsx, BackupNotice.tsx |
+| B8 | F16 補正欄の「−」トグル（§8.2）＋テスト（トグルで負の値が確定・却下時に戻る・PCの "-10" 直接入力） | B | 完了 | - | components/AdjustInput.tsx, summary.css |
+| B9 | F18 集計「日」のカレンダー（§8.4）＋テスト（記録日の印・選択で日付移動・未来日は押せない） | B | 完了 | A7 | components/MonthCalendar.tsx, SummaryScreen.tsx |
+| B10 | F19 履歴編集 UI（§8.5）: `SegmentHistory` の編集モード、今日画面への履歴（折りたたみ）追加＋テスト | B | 作業中 | L4, A6, A7 | components/SegmentHistory.tsx, TodayScreen.tsx, SummaryScreen.tsx |
 | L6 | 改訂1 統合確認: 要件 §7 の（改訂1）9項目を確認、dist の外部参照 grep、デプロイ、ユーザーへ提示（iPhone 実機のアイコン確認はユーザーに依頼） | L | 未着手 | 改訂1全タスク | - |
 
 ## 要相談 / 申し送り
 > 境界をまたぐ変更、契約の変更提案、ブロッカーをここに起票。リーダーが裁定して解消。
+- 【巡回レビュー3回目・リーダーより 2026-10-22】typecheck / lint / test(166件) / build は、作業ツリーとコミット済み HEAD 単体の両方で通過
+  - **合格→完了**: A6（§4.3 の検証順・文言どおり）、A7、B7、B8、B9。L5（アイコン）も完了（`scripts/export-icon.ps1` で PNG を再生成できる）
+  - 対応しなくても合格扱いにする指摘（任意）:
+    - B9: カレンダーを開いたまま「前の期間／次の期間」で月をまたぐと、選択日は動くがカレンダーの表示月は元の月のまま。`shift` 時に閉じるか、`MonthCalendar` に `key={月}` を付けると揃う
+    - B9: 日付ラベルをボタンにした分岐で `aria-live="polite"` が外れ、前後移動の読み上げが日モードだけ無くなった。ボタン側にも付けるとよい
 - 【L4 完了・リーダーより 2026-10-22】`SegmentEdit` 型と `AppStore.editSegment` を `src/shared/types.ts` に追加（設計書 §4.1 どおり）。A6・B10 は着手可
   - **Sonnet A へ**: 型追加でビルドが落ちるため、`createAppStore.ts` に `editSegment` の仮置き（DomainError「履歴の編集はまだ使えません。」を投げるだけ）を入れた。A6 で `actions.editSegment` への配線に置き換えてください（`DomainError` の import も追加済み）
 - 【改訂1 開始・メインOpusより 2026-10-22】要件 F15〜F19（`01-requirements.md` 改訂1）、設計 `02-design.md` §8 と §4 の（改訂1）を参照

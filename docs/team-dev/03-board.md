@@ -4,7 +4,7 @@
 > 更新したら即コミット（`docs: ボード更新`）。各ワーカーは**自分の行だけ**書き換える。
 > 構造変更（タスク追加・境界変更・要相談の裁定）はリーダーOpusが行う。
 
-最終更新: リーダーOpus 2026-10-22（L6 完了。改訂1の必須タスクはすべて完了）
+最終更新: リーダーOpus 2026-10-22（巡回レビュー5回目: B6 合格、B8 差し戻し）
 
 ## ファイルオーナーシップ（並行作業の境界）
 - **Sonnet A**: `src/domain/**`, `src/store/**`
@@ -36,20 +36,27 @@
 | B3 | 集計画面: 日/週/月切替と前後移動、業務別合計表、日次は±分補正入力と切り替え履歴（時刻・業務） | B | 完了 | B1 | src/ui/screens/SummaryScreen.tsx |
 | B4 | 業務管理画面（改名・非表示/再表示・上下並べ替え）、データ画面（書き出し/読み込み・最終バックアップ日時・「データはこの端末のブラウザにのみ保存」の説明）、打刻忘れダイアログ | B | 完了 | B1 | src/ui/screens/TasksScreen.tsx, DataScreen.tsx |
 | B5 | fakeStore → 実Store差し替え（`main.tsx`）、`dev/` 削除、375px 幅確認 | B | 完了 | A5, B2-B4 | src/main.tsx, src/ui/dev/ |
-| B6 | 改善（任意・受け入れ外）: 375px の集計表で数値「1時間30分」や業務名が途中で折り返されて読みにくい。数値列は `white-space: nowrap`、業務名は単語途中で切れないよう列幅・折り返しを調整 | B | レビュー待ち | - | src/ui/styles/summary.css |
+| B6 | 改善（任意・受け入れ外）: 375px の集計表で数値「1時間30分」や業務名が途中で折り返されて読みにくい。数値列は `white-space: nowrap`、業務名は単語途中で切れないよう列幅・折り返しを調整 | B | 完了 | - | src/ui/styles/summary.css |
 | L3 | 統合確認: 要件定義 §7 受け入れ条件の全項目チェック、dist の外部参照 grep、デプロイ、ユーザーへ提示 | L | 完了 | 全タスク | - |
 | L4 | 改訂1の契約: 設計書 §4.1 の `SegmentEdit` 型と `AppStore.editSegment` を `src/shared/types.ts` に書き起こす。fake 実装がないので型追加だけでビルドが落ちる場合は、A6 着手まで `createAppStore` に「未実装」DomainError を投げる仮メソッドを置いてよい（A に一言起票） | L | 完了 | - | src/shared/types.ts |
 | L5 | F15 アプリアイコン（設計書 §8.1）: `public/icon.svg`・`public/apple-touch-icon.png`(180px)・`index.html` のリンク差し替え・書き出し手順の保存 | L | 完了 | - | public/**, index.html, scripts/ |
 | A6 | F19 Store: `actions.editSegment`（§4.3 の検証順）と `createAppStore` への配線＋テスト | A | 完了 | L4 | src/store/actions.ts, createAppStore.ts |
 | A7 | 改訂1 Domain: `time.ts` に `withClockTime`・`calendarWeeks`（§4.2）＋テスト（月曜始まり・月初が日曜の月・2月・不正な "HH:MM"） | A | 完了 | - | src/domain/time.ts |
 | B7 | F17 バックアップ注意を今日画面から外しデータ画面へ（§8.3）＋テスト | B | 完了 | - | TodayScreen.tsx, DataScreen.tsx, BackupNotice.tsx |
-| B8 | F16 補正欄の「−」トグル（§8.2）＋テスト（トグルで負の値が確定・却下時に戻る・PCの "-10" 直接入力） | B | 完了 | - | components/AdjustInput.tsx, summary.css |
+| B8 | F16 補正欄の「−」トグル（§8.2）＋テスト（トグルで負の値が確定・却下時に戻る・PCの "-10" 直接入力） | B | 修正中 | - | components/AdjustInput.tsx, summary.css |
 | B9 | F18 集計「日」のカレンダー（§8.4）＋テスト（記録日の印・選択で日付移動・未来日は押せない） | B | 完了 | A7 | components/MonthCalendar.tsx, SummaryScreen.tsx |
 | B10 | F19 履歴編集 UI（§8.5）: `SegmentHistory` の編集モード、今日画面への履歴（折りたたみ）追加＋テスト | B | 完了 | L4, A6, A7 | components/SegmentHistory.tsx, TodayScreen.tsx, SummaryScreen.tsx |
 | L6 | 改訂1 統合確認: 要件 §7 の（改訂1）9項目を確認、dist の外部参照 grep、デプロイ、ユーザーへ提示（iPhone 実機のアイコン確認はユーザーに依頼） | L | 完了 | 改訂1全タスク | - |
 
 ## 要相談 / 申し送り
 > 境界をまたぐ変更、契約の変更提案、ブロッカーをここに起票。リーダーが裁定して解消。
+- 【巡回レビュー5回目・リーダーより 2026-10-22】
+  - **B6（＋B9 の任意指摘2点）合格→完了**（42d1a69）。数値列は1行に収まり、375px で長い業務名（英字・日本語・混在）でも横スクロールなし。カレンダーの表示月の追従と `aria-live` も確認
+  - **B8 差し戻し（修正中）** `src/ui/styles/summary.css` の `.adjust-input`
+    - 症状: 375px の集計「日」で、補正の入力欄が幅 **21px** まで潰れ、値（例: 125）が「(」「·」のようにしか見えない。業務名の長さに関係なく、すべての行で起きる。B6 の前（be5ba19）でも同じで、原因は B8 で入った `width: 3rem; min-width: 0; flex: 1 1 auto`（表の自動レイアウトで最小幅まで縮む）
+    - 直すこと: 375px で入力欄が **3桁＋余白（目安 3.5rem 以上）** を保ち、値が読めること。同時に、375px で横スクロールが出ないこと（長い業務名でも）。列が足りなければ、業務名の列を折り返して譲る・補正セルの `gap` や「−」ボタン以外の余白を詰める、などで調整してよい（「−」ボタンのタップ領域 44px は保つ）
+    - 確認方法: 375px で、業務名「API設計レビュー（BackendTeam）」・補正 −125 の日を表示し、入力欄の `getBoundingClientRect().width` と `document.documentElement.scrollWidth <= 375` を見ること。修正後はリーダーが同じ方法で再確認する
+  - ※ リーダーの見落とし: B8 のレビューと L6 の項目2は値の反映だけを見て、375px での見た目を確かめていなかった。B8 の修正後に L6 の項目2を再確認する
 - 【L6 完了・リーダーより 2026-10-22】要件 §7（改訂1）9項目を、375px のヘッドレス Chrome で本番ビルドを自動操作して確認した。ローカルと公開URLの両方で 9/9 OK、外部通信 0 件、コンソールエラー 0 件。iPhone 実機のアイコン確認はユーザーに依頼中。残りは任意の B6 と B9 の指摘2点
 - 【巡回レビュー4回目・リーダーより 2026-10-22】B10 合格→完了。§8.5 の各項目（先頭行の時刻無効化・非表示業務を選択肢に残す・却下時はフォームを開いたまま・同時1行・日付移動で閉じる・今日画面は折りたたみ）をテストとコードで確認。typecheck / lint / test(177件) / build 通過、dist の外部参照は名前空間文字列のみ。push 済み。次はリーダーが L6
 - 【巡回レビュー3回目・リーダーより 2026-10-22】typecheck / lint / test(166件) / build は、作業ツリーとコミット済み HEAD 単体の両方で通過

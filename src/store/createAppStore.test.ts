@@ -107,6 +107,43 @@ describe('操作と購読', () => {
   });
 });
 
+describe('editSegment', () => {
+  function workedStore(storage: StorageLike = new MemoryStorage()): AppStore {
+    const store = makeStore(storage);
+    store.clockIn(T0);
+    store.switchTo({ kind: 'break' }, T0 + 60 * MIN);
+    store.switchTo({ kind: 'task', taskId: GENERAL_TASK_ID }, T0 + 120 * MIN);
+    return store;
+  }
+
+  it('更新して通知・保存する。now を省略すると clock の時刻で検証する', () => {
+    const storage = new MemoryStorage();
+    const store = workedStore(storage);
+    const listener = vi.fn();
+    store.subscribe(listener);
+    store.editSegment(TODAY, 1, { start: T0 + 30 * MIN, target: { kind: 'break' } }, T0 + 200 * MIN);
+    expect(listener).toHaveBeenCalledTimes(1);
+    expect(store.getState().days[TODAY]?.segments[0]?.end).toBe(T0 + 30 * MIN);
+    expect(parseAppData(storage.map.get(STORAGE_KEY) ?? '').days[TODAY]?.segments[1]?.start).toBe(T0 + 30 * MIN);
+    // clock は T0 なので、それより後の開始は「未来」として弾かれる
+    expect(() => store.editSegment(TODAY, 2, { start: T0 + 150 * MIN, target: { kind: 'break' } })).toThrow(
+      DomainError,
+    );
+  });
+
+  it('検証NGでは状態も通知も変わらない', () => {
+    const store = workedStore();
+    const before = store.getState();
+    const listener = vi.fn();
+    store.subscribe(listener);
+    expect(() => store.editSegment(TODAY, 0, { start: T0 + MIN, target: { kind: 'break' } }, T0 + 200 * MIN)).toThrow(
+      DomainError,
+    );
+    expect(store.getState()).toBe(before);
+    expect(listener).not.toHaveBeenCalled();
+  });
+});
+
 describe('永続化', () => {
   it('変更を保存し、新しいストアで復元できる', () => {
     const storage = new MemoryStorage();

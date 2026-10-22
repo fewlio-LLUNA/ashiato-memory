@@ -10,12 +10,14 @@ import {
   type DateKey,
   type EpochMs,
   type Segment,
+  type SegmentEdit,
   type SwitchTarget,
   type Task,
   type TaskId,
   type WorkDay,
 } from '../shared/types';
 import { findStaleDay, getActiveDay, summarizeDay } from '../domain/summary';
+import { formatClock } from '../domain/format';
 import { toDateKey } from '../domain/time';
 
 const STALE_DAY_MESSAGE = '前の日の終了時刻が未確定です。先に終了時刻を入力してください。';
@@ -207,4 +209,71 @@ export function setAdjustment(
   const adjustments =
     minutes === 0 ? withoutKey(day.adjustments, taskId) : { ...day.adjustments, [taskId]: minutes };
   return withDay(data, { ...day, adjustments });
+}
+
+// ---- 履歴編集 ----
+
+const NEGATIVE_TOTAL_MESSAGE = '補正と合わせて0分未満になる業務があるため変更できません。';
+
+/** 先頭の行は業務開始時刻なので動かせない。それ以外は前後の行と矛盾しない範囲に限る */
+function assertStartAllowed(day: WorkDay, index: number, start: EpochMs, now: EpochMs): void {
+  const current = day.segments[index];
+  if (current === undefined) throw new DomainError('その履歴が見つかりません。');
+  if (index === 0) {
+    if (start !== current.start) throw new DomainError('先頭の行の開始時刻（業務開始）は変更できません。');
+    return;
+  }
+  const prevStart = day.segments[index - 1]?.start ?? current.start;
+  if (start <= prevStart) {
+    throw new DomainError(`直前の行の開始（${formatClock(prevStart)}）より後にしてください。`);
+  }
+  if (current.end !== null && start >= current.end) {
+    throw new DomainError(`この行の終了（${formatClock(current.end)}）より前にしてください。`);
+  }
+  if (start > now) throw new DomainError('未来の時刻は指定できません。');
+  if (current.end === null && start >= now) {
+    throw new DomainError(`現在時刻（${formatClock(now)}）より前にしてください。`);
+  }
+}
+
+/** 変更後の対象を区間に反映する。非表示の業務は、現在と同じ業務のときだけ許す */
+function editedSegment(data: AppData, current: Segment, edit: SegmentEdit): Segment {
+  const { target } = edit;
+  if (target.kind === 'break') return { ...current, kind: 'break', taskId: null, start: edit.start };
+  const task = findTask(data, target.taskId);
+  const unchanged = current.kind === 'task' && current.taskId === task.id;
+  if (task.archived && !unchanged) throw new DomainError('非表示の業務には変更できません。');
+  return { ...current, kind: 'task', taskId: task.id, start: edit.start };
+}
+
+function assertAdjustmentsHold(day: WorkDay, now: EpochMs): void {
+  const totals = summarizeDay(day, now).perTask;
+  const broken = Object.entries(day.adjustments).some(([taskId, minutes]) => {
+    const measured = totals.find((t) => t.taskId === taskId)?.measuredMinutes ?? 0;
+    return measured + minutes < 0;
+  });
+  if (broken) throw new DomainError(NEGATIVE_TOTAL_MESSAGE);
+}
+
+/** 切り替え履歴1行の開始時刻と対象を更新する。直前の行の終了も同じ時刻に揃える */
+export function editSegment(
+  data: AppData,
+  date: DateKey,
+  index: number,
+  edit: SegmentEdit,
+  now: EpochMs,
+): AppData {
+  const day = data.days[date];
+  if (day === undefined) throw new DomainError('その日の記録がありません。');
+  const current = Number.isInteger(index) ? day.segments[index] : undefined;
+  if (current === undefined) throw new DomainError('その履歴が見つかりません。');
+  assertStartAllowed(day, index, edit.start, now);
+  const edited = editedSegment(data, current, edit);
+  const segments = day.segments.map((seg, i) => {
+    if (i === index) return edited;
+    return i === index - 1 ? { ...seg, end: edit.start } : seg;
+  });
+  const next: WorkDay = { ...day, segments };
+  assertAdjustmentsHold(next, now);
+  return withDay(data, next);
 }

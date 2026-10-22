@@ -1,12 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import { GENERAL_TASK_ID, MS_PER_MINUTE, TASK_NAME_MAX_LENGTH } from '../shared/constants';
-import { DomainError, type AppData } from '../shared/types';
+import { DomainError, type AppData, type WorkDay } from '../shared/types';
 import {
   clockIn,
   clockOut,
   closeStaleDay,
   createInitialData,
   createTask,
+  editSegment,
   renameTask,
   reorderTasks,
   resumeDay,
@@ -262,5 +263,106 @@ describe('setAdjustment', () => {
     expect(() => setAdjustment(data, TODAY, GENERAL_TASK_ID, 1.5, now)).toThrow(DomainError);
     expect(() => setAdjustment(data, '2026-01-01', GENERAL_TASK_ID, 5, now)).toThrow(DomainError);
     expect(() => setAdjustment(data, TODAY, 'zzz', 5, now)).toThrow(DomainError);
+  });
+});
+
+describe('editSegment', () => {
+  const NOW = T0 + 300 * MIN;
+  const TASK_A = { kind: 'task', taskId: 'a' } as const;
+
+  /** 庶務 9:00-10:00 → A 10:00-12:00 → 休憩 12:00-13:00 → 庶務 13:00-計測中 */
+  function history(): AppData {
+    let d = withTask(working(), 'a', 'A');
+    d = switchTo(d, TASK_A, T0 + 60 * MIN);
+    d = switchTo(d, { kind: 'break' }, T0 + 180 * MIN);
+    return switchTo(d, { kind: 'task', taskId: GENERAL_TASK_ID }, T0 + 240 * MIN);
+  }
+
+  const day = (d: AppData): WorkDay => d.days[TODAY] as WorkDay;
+  const edit = (d: AppData, index: number, start: number, target: Parameters<typeof editSegment>[3]['target']) =>
+    editSegment(d, TODAY, index, { start, target }, NOW);
+
+  it('開始時刻を変えると直前の行の終了も同じ時刻になる', () => {
+    const next = edit(history(), 1, T0 + 90 * MIN, TASK_A);
+    expect(day(next).segments[0]?.end).toBe(T0 + 90 * MIN);
+    expect(day(next).segments[1]?.start).toBe(T0 + 90 * MIN);
+    expect(day(next).segments[1]?.end).toBe(T0 + 180 * MIN);
+  });
+
+  it('対象を業務から休憩に、休憩から業務に変えられる', () => {
+    const toBreak = edit(history(), 1, T0 + 60 * MIN, { kind: 'break' });
+    expect(day(toBreak).segments[1]).toMatchObject({ kind: 'break', taskId: null });
+    const toTask = edit(history(), 2, T0 + 180 * MIN, TASK_A);
+    expect(day(toTask).segments[2]).toMatchObject({ kind: 'task', taskId: 'a' });
+  });
+
+  it('隣と同じ業務になっても区間は結合しない', () => {
+    const next = edit(history(), 2, T0 + 180 * MIN, TASK_A);
+    expect(day(next).segments).toHaveLength(4);
+  });
+
+  it('計測中の最後の行も編集でき、end は null のまま', () => {
+    const next = edit(history(), 3, T0 + 250 * MIN, TASK_A);
+    expect(day(next).segments[3]).toMatchObject({ start: T0 + 250 * MIN, end: null, taskId: 'a' });
+    expect(day(next).segments[2]?.end).toBe(T0 + 250 * MIN);
+  });
+
+  it('先頭の行は対象だけ変えられ、開始時刻の変更は DomainError', () => {
+    const next = edit(history(), 0, T0, TASK_A);
+    expect(day(next).segments[0]).toMatchObject({ taskId: 'a', start: T0 });
+    expect(() => edit(history(), 0, T0 + MIN, TASK_A)).toThrow('先頭の行の開始時刻（業務開始）は変更できません。');
+  });
+
+  it('境界: 直前の開始ちょうどは不可、1ms 後は可', () => {
+    expect(() => edit(history(), 1, T0, TASK_A)).toThrow('直前の行の開始（09:00）より後にしてください。');
+    expect(() => edit(history(), 1, T0 + 1, TASK_A)).not.toThrow();
+  });
+
+  it('境界: この行の終了ちょうどは不可、1ms 前は可', () => {
+    expect(() => edit(history(), 1, T0 + 180 * MIN, TASK_A)).toThrow('この行の終了（12:00）より前にしてください。');
+    expect(() => edit(history(), 1, T0 + 180 * MIN - 1, TASK_A)).not.toThrow();
+  });
+
+  it('境界: 計測中の行は now ちょうどは不可、未来は不可、1ms 前は可', () => {
+    expect(() => edit(history(), 3, NOW, TASK_A)).toThrow('現在時刻（14:00）より前にしてください。');
+    expect(() => edit(history(), 3, NOW + 1, TASK_A)).toThrow('未来の時刻は指定できません。');
+    expect(() => edit(history(), 3, NOW - 1, TASK_A)).not.toThrow();
+  });
+
+  it('記録のない日・範囲外の index は DomainError', () => {
+    const d = history();
+    expect(() => editSegment(d, '2000-01-01', 0, { start: T0, target: TASK_A }, NOW)).toThrow(DomainError);
+    expect(() => edit(d, 4, T0 + MIN, TASK_A)).toThrow(DomainError);
+    expect(() => edit(d, -1, T0 + MIN, TASK_A)).toThrow(DomainError);
+    expect(() => edit(d, 1.5, T0 + MIN, TASK_A)).toThrow(DomainError);
+  });
+
+  it('存在しない業務・非表示の業務は不可。現在と同じ非表示業務なら可', () => {
+    expect(() => edit(history(), 1, T0 + 90 * MIN, { kind: 'task', taskId: 'zzz' })).toThrow(DomainError);
+    const archived = setTaskArchived(history(), 'a', true);
+    expect(() => edit(archived, 2, T0 + 190 * MIN, TASK_A)).toThrow('非表示の業務には変更できません。');
+    expect(() => edit(archived, 1, T0 + 90 * MIN, TASK_A)).not.toThrow();
+  });
+
+  it('補正と合わせて 0 分未満になる変更は DomainError', () => {
+    // A は実測 120 分。-120 の補正まで許される
+    const adjusted = setAdjustment(history(), TODAY, 'a', -120, NOW);
+    expect(() => edit(adjusted, 1, T0 + 61 * MIN, TASK_A)).toThrow(
+      '補正と合わせて0分未満になる業務があるため変更できません。',
+    );
+    expect(() => edit(adjusted, 1, T0 + 60 * MIN, { kind: 'break' })).toThrow(DomainError);
+  });
+
+  it('補正があっても合計が 0 以上に保たれる変更は成功する', () => {
+    const adjusted = setAdjustment(history(), TODAY, 'a', -60, NOW);
+    expect(() => edit(adjusted, 1, T0 + 90 * MIN, TASK_A)).not.toThrow();
+  });
+
+  it('失敗時はデータを変更しない／成功時も元データを書き換えない', () => {
+    const base = history();
+    const snapshot = structuredClone(base);
+    expect(() => edit(base, 1, T0, TASK_A)).toThrow(DomainError);
+    edit(base, 1, T0 + 90 * MIN, TASK_A);
+    expect(base).toEqual(snapshot);
   });
 });

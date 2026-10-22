@@ -1,10 +1,10 @@
 import { LAST_BACKUP_KEY, STORAGE_KEY } from '../shared/constants';
 import {
-  DomainError,
   type AppData,
   type AppStore,
   type DateKey,
   type EpochMs,
+  type SegmentEdit,
   type SwitchTarget,
   type Task,
   type TaskId,
@@ -142,10 +142,8 @@ export function createAppStore(options: AppStoreOptions = {}): AppStore {
     setAdjustment: (date: DateKey, taskId: TaskId, minutes: number) =>
       mutate((d) => actions.setAdjustment(d, date, taskId, minutes, clock())),
 
-    // L4 の仮置き。A6 で actions.editSegment への配線に置き換える
-    editSegment: () => {
-      throw new DomainError('履歴の編集はまだ使えません。');
-    },
+    editSegment: (date: DateKey, index: number, edit: SegmentEdit, now: EpochMs = clock()) =>
+      mutate((d) => actions.editSegment(d, date, index, edit, now)),
 
     exportJson(now: EpochMs = clock()): string {
       syncLatest();

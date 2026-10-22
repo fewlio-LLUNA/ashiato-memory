@@ -4,7 +4,7 @@
 > 更新したら即コミット（`docs: ボード更新`）。各ワーカーは**自分の行だけ**書き換える。
 > 構造変更（タスク追加・境界変更・要相談の裁定）はリーダーOpusが行う。
 
-最終更新: リーダーOpus 2026-10-22（巡回レビュー3回目: A6・A7・B7・B8・B9 合格、L4・L5 完了）
+最終更新: リーダーOpus 2026-10-22（巡回レビュー4回目: B10 合格、push 済み）
 
 ## ファイルオーナーシップ（並行作業の境界）
 - **Sonnet A**: `src/domain/**`, `src/store/**`
@@ -45,11 +45,12 @@
 | B7 | F17 バックアップ注意を今日画面から外しデータ画面へ（§8.3）＋テスト | B | 完了 | - | TodayScreen.tsx, DataScreen.tsx, BackupNotice.tsx |
 | B8 | F16 補正欄の「−」トグル（§8.2）＋テスト（トグルで負の値が確定・却下時に戻る・PCの "-10" 直接入力） | B | 完了 | - | components/AdjustInput.tsx, summary.css |
 | B9 | F18 集計「日」のカレンダー（§8.4）＋テスト（記録日の印・選択で日付移動・未来日は押せない） | B | 完了 | A7 | components/MonthCalendar.tsx, SummaryScreen.tsx |
-| B10 | F19 履歴編集 UI（§8.5）: `SegmentHistory` の編集モード、今日画面への履歴（折りたたみ）追加＋テスト | B | レビュー待ち | L4, A6, A7 | components/SegmentHistory.tsx, TodayScreen.tsx, SummaryScreen.tsx |
+| B10 | F19 履歴編集 UI（§8.5）: `SegmentHistory` の編集モード、今日画面への履歴（折りたたみ）追加＋テスト | B | 完了 | L4, A6, A7 | components/SegmentHistory.tsx, TodayScreen.tsx, SummaryScreen.tsx |
 | L6 | 改訂1 統合確認: 要件 §7 の（改訂1）9項目を確認、dist の外部参照 grep、デプロイ、ユーザーへ提示（iPhone 実機のアイコン確認はユーザーに依頼） | L | 未着手 | 改訂1全タスク | - |
 
 ## 要相談 / 申し送り
 > 境界をまたぐ変更、契約の変更提案、ブロッカーをここに起票。リーダーが裁定して解消。
+- 【巡回レビュー4回目・リーダーより 2026-10-22】B10 合格→完了。§8.5 の各項目（先頭行の時刻無効化・非表示業務を選択肢に残す・却下時はフォームを開いたまま・同時1行・日付移動で閉じる・今日画面は折りたたみ）をテストとコードで確認。typecheck / lint / test(177件) / build 通過、dist の外部参照は名前空間文字列のみ。push 済み。次はリーダーが L6
 - 【巡回レビュー3回目・リーダーより 2026-10-22】typecheck / lint / test(166件) / build は、作業ツリーとコミット済み HEAD 単体の両方で通過
   - **合格→完了**: A6（§4.3 の検証順・文言どおり）、A7、B7、B8、B9。L5（アイコン）も完了（`scripts/export-icon.ps1` で PNG を再生成できる）
   - 対応しなくても合格扱いにする指摘（任意）:

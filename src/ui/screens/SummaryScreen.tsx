@@ -4,6 +4,7 @@ import { summarizeDay, summarizeRange } from '../../domain/summary';
 import { toDateKey } from '../../domain/time';
 import type { AppData, AppStore, DateKey, EpochMs, TaskTotal, WorkDay } from '../../shared/types';
 import { ErrorMessage } from '../components/ErrorMessage';
+import { MonthCalendar } from '../components/MonthCalendar';
 import { PeriodSwitcher } from '../components/PeriodSwitcher';
 import { SegmentHistory } from '../components/SegmentHistory';
 import { SummaryTable, type AdjustEditor } from '../components/SummaryTable';
@@ -70,6 +71,7 @@ export function SummaryScreen({ store }: SummaryScreenProps): ReactElement {
   const [mode, setMode] = useState<PeriodMode>('day');
   const [anchor, setAnchor] = useState<DateKey>(() => toDateKey(Date.now()));
   const [inputError, setInputError] = useState<string | null>(null);
+  const [calendarOpen, setCalendarOpen] = useState(false);
 
   const { from, to } = rangeOf(mode, anchor);
   const range = summarizeRange(data, from, to, now);
@@ -82,10 +84,39 @@ export function SummaryScreen({ store }: SummaryScreenProps): ReactElement {
     setAnchor(shiftAnchor(mode, anchor, direction));
   };
 
+  const changeMode = (next: PeriodMode): void => {
+    setCalendarOpen(false);
+    setMode(next);
+  };
+
+  /** カレンダーで選んだ日へ移動する。入力・エラーの状態は持ち越さない。 */
+  const pickDate = (date: DateKey): void => {
+    setInputError(null);
+    runner.clear();
+    setAnchor(date);
+    setCalendarOpen(false);
+  };
+
   return (
     <div className="summary">
       <h1 className="screen__title">集計</h1>
-      <PeriodSwitcher mode={mode} anchor={anchor} onModeChange={setMode} onShift={shift} />
+      <PeriodSwitcher
+        mode={mode}
+        anchor={anchor}
+        onModeChange={changeMode}
+        onShift={shift}
+        onLabelClick={mode === 'day' ? () => setCalendarOpen((open) => !open) : undefined}
+        labelExpanded={calendarOpen}
+      />
+      {mode === 'day' && calendarOpen && (
+        <MonthCalendar
+          initialMonth={anchor}
+          selected={anchor}
+          today={toDateKey(now)}
+          hasRecord={(date) => data.days[date] !== undefined}
+          onSelect={pickDate}
+        />
+      )}
       <ErrorMessage message={inputError ?? runner.error} />
       <section className="card" aria-label="業務別合計">
         <Totals work={range.workMinutes} rest={range.breakMinutes} dayCount={range.dayCount} />

@@ -1,7 +1,9 @@
 // @vitest-environment jsdom
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { formatDateLabel } from '../../domain/format';
+import { toDateKey } from '../../domain/time';
 import { createTestStore } from '../testing/createTestStore';
 import { SummaryScreen } from './SummaryScreen';
 
@@ -159,6 +161,100 @@ describe('SummaryScreen', () => {
       commitWithEnter(field());
       expect(container.querySelector('[role="alert"]')).not.toBeNull();
       expect(field().value).toBe('0');
+    });
+  });
+
+  describe('カレンダー', () => {
+    // 月初・月末で結果が変わらないよう、時刻を月の中ほどに固定する
+    beforeEach(() => {
+      vi.useFakeTimers({ toFake: ['Date'] });
+      vi.setSystemTime(new Date(2026, 9, 22, 12, 0));
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    function openCalendar(): void {
+      const label = container.querySelector('button.period__label') as HTMLButtonElement;
+      act(() => label.click());
+    }
+
+    function setupWithPastDay(): { store: ReturnType<typeof createTestStore>; pastLabel: string } {
+      const store = createTestStore();
+      const past = Date.now() - 2 * MS_PER_DAY;
+      store.clockIn(past);
+      store.clockOut(past + HOUR_MS);
+      store.clockIn();
+      act(() => root.render(<SummaryScreen store={store} />));
+      return { store, pastLabel: formatDateLabel(toDateKey(past)) };
+    }
+
+    it('日付ラベルを押すとカレンダーが開閉する', () => {
+      setupWithPastDay();
+      expect(container.querySelector('.calendar')).toBeNull();
+      openCalendar();
+      expect(container.querySelector('.calendar')).not.toBeNull();
+      openCalendar();
+      expect(container.querySelector('.calendar')).toBeNull();
+    });
+
+    it('週・月モードではラベルはボタンではなくカレンダーも出ない', () => {
+      setupWithPastDay();
+      openCalendar();
+      const week = [...container.querySelectorAll('button')].find((b) => b.textContent === '週');
+      act(() => week?.click());
+      expect(container.querySelector('button.period__label')).toBeNull();
+      expect(container.querySelector('.calendar')).toBeNull();
+    });
+
+    it('記録のある日だけ「記録あり」の印が付く（今日も記録あり）', () => {
+      const { pastLabel } = setupWithPastDay();
+      openCalendar();
+      const marked = [...container.querySelectorAll('.calendar__dot')].length;
+      expect(marked).toBe(2);
+      expect(container.querySelector(`.calendar__day[aria-label^="${pastLabel}"]`)?.getAttribute('aria-label')).toContain('記録あり');
+    });
+
+    it('過去の日を選ぶとその日へ移動してカレンダーが閉じる', () => {
+      const { pastLabel } = setupWithPastDay();
+      openCalendar();
+      const target = container.querySelector(`.calendar__day[aria-label^="${pastLabel}"]`) as HTMLButtonElement;
+      act(() => target.click());
+      expect(container.querySelector('.calendar')).toBeNull();
+      expect(container.querySelector('.period__label')?.textContent).toBe(pastLabel);
+    });
+
+    it('未来の日は押せない', () => {
+      setupWithPastDay();
+      openCalendar();
+      const buttons = [...container.querySelectorAll<HTMLButtonElement>('.calendar__day')];
+      const todayIndex = buttons.findIndex((b) => b.getAttribute('aria-label')?.includes('今日'));
+      expect(todayIndex).toBeGreaterThanOrEqual(0);
+      const future = buttons.slice(todayIndex + 1);
+      expect(future.every((b) => b.disabled)).toBe(true);
+      expect(buttons[todayIndex]?.disabled).toBe(false);
+      expect(future.length).toBeGreaterThan(0);
+    });
+
+    it('今日の月では「次の月」を押せず、「前の月」で月が変わる', () => {
+      setupWithPastDay();
+      openCalendar();
+      const next = container.querySelector('button[aria-label="次の月"]') as HTMLButtonElement;
+      expect(next.disabled).toBe(true);
+      const before = container.querySelector('.calendar__title')?.textContent;
+      act(() => (container.querySelector('button[aria-label="前の月"]') as HTMLButtonElement).click());
+      expect(container.querySelector('.calendar__title')?.textContent).not.toBe(before);
+      expect((container.querySelector('button[aria-label="次の月"]') as HTMLButtonElement).disabled).toBe(false);
+    });
+
+    it('選んだ日を移動しても入力途中の補正は持ち越されない', () => {
+      setupWithPastDay();
+      typeInto(container.querySelector('input[aria-label="庶務の補正（分）"]') as HTMLInputElement, '7');
+      openCalendar();
+      const past = container.querySelector('.calendar__day[aria-label*="記録あり"]:not(.calendar__day--today)') as HTMLButtonElement;
+      act(() => past.click());
+      expect((container.querySelector('input[aria-label="庶務の補正（分）"]') as HTMLInputElement).value).toBe('0');
     });
   });
 });

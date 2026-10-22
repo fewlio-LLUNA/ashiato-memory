@@ -42,7 +42,7 @@
 | L5 | F15 アプリアイコン（設計書 §8.1）: `public/icon.svg`・`public/apple-touch-icon.png`(180px)・`index.html` のリンク差し替え・書き出し手順の保存 | L | 未着手 | - | public/**, index.html, scripts/ |
 | A6 | F19 Store: `actions.editSegment`（§4.3 の検証順）と `createAppStore` への配線＋テスト | A | 未着手 | L4 | src/store/actions.ts, createAppStore.ts |
 | A7 | 改訂1 Domain: `time.ts` に `withClockTime`・`calendarWeeks`（§4.2）＋テスト（月曜始まり・月初が日曜の月・2月・不正な "HH:MM"） | A | レビュー待ち | - | src/domain/time.ts |
-| B7 | F17 バックアップ注意を今日画面から外しデータ画面へ（§8.3）＋テスト | B | 作業中 | - | TodayScreen.tsx, DataScreen.tsx, BackupNotice.tsx |
+| B7 | F17 バックアップ注意を今日画面から外しデータ画面へ（§8.3）＋テスト | B | レビュー待ち | - | TodayScreen.tsx, DataScreen.tsx, BackupNotice.tsx |
 | B8 | F16 補正欄の「−」トグル（§8.2）＋テスト（トグルで負の値が確定・却下時に戻る・PCの "-10" 直接入力） | B | 未着手 | - | components/AdjustInput.tsx, summary.css |
 | B9 | F18 集計「日」のカレンダー（§8.4）＋テスト（記録日の印・選択で日付移動・未来日は押せない） | B | 未着手 | A7 | components/MonthCalendar.tsx, SummaryScreen.tsx |
 | B10 | F19 履歴編集 UI（§8.5）: `SegmentHistory` の編集モード、今日画面への履歴（折りたたみ）追加＋テスト | B | 未着手 | L4, A6, A7 | components/SegmentHistory.tsx, TodayScreen.tsx, SummaryScreen.tsx |

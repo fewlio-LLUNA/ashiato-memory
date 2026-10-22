@@ -2,8 +2,11 @@ import { useState, type ChangeEvent, type ReactElement } from 'react';
 import { formatClock, formatDateLabel } from '../../domain/format';
 import { toDateKey } from '../../domain/time';
 import { DomainError, type AppStore, type EpochMs } from '../../shared/types';
+import { BackupNotice } from '../components/BackupNotice';
 import { ErrorMessage } from '../components/ErrorMessage';
 import { useActionRunner } from '../hooks/useActionRunner';
+import { useAppState } from '../hooks/useAppState';
+import { useNow } from '../hooks/useNow';
 import { DownloadIcon, UploadIcon } from '../icons';
 import '../styles/manage.css';
 import { backupFileName, downloadJson } from './downloadFile';
@@ -23,6 +26,8 @@ function lastBackupText(at: EpochMs | null): string {
 
 /** データ画面。バックアップの書き出し・読み込みと、保存先の説明。 */
 export function DataScreen({ store }: DataScreenProps): ReactElement {
+  const data = useAppState(store);
+  const now = useNow();
   const runner = useActionRunner();
   const [done, setDone] = useState<string | null>(null);
   const [lastBackupAt, setLastBackupAt] = useState<EpochMs | null>(() => store.getLastBackupAt());
@@ -52,6 +57,7 @@ export function DataScreen({ store }: DataScreenProps): ReactElement {
     <div className="manage">
       <h1 className="screen__title">データ</h1>
       <p className="notice">データはこの端末のブラウザにのみ保存されます。サーバーには送信されません。ブラウザの閲覧データを消すと記録も消えるため、定期的に書き出してください。</p>
+      <BackupNotice lastBackupAt={lastBackupAt} hasRecords={Object.keys(data.days).length > 0} now={now} />
       <ErrorMessage message={runner.error} />
       {done !== null && <p className="message--ok" role="status">{done}</p>}
       <section className="card">

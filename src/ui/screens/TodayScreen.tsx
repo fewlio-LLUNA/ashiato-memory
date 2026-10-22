@@ -2,7 +2,6 @@ import type { ReactElement } from 'react';
 import { findStaleDay, summarizeDay } from '../../domain/summary';
 import { toDateKey } from '../../domain/time';
 import type { AppData, AppStore, EpochMs, WorkDay } from '../../shared/types';
-import { BackupNotice } from '../components/BackupNotice';
 import { DayTotals } from '../components/DayTotals';
 import { ErrorMessage } from '../components/ErrorMessage';
 import { NewTaskForm } from '../components/NewTaskForm';
@@ -93,7 +92,6 @@ export function TodayScreen({ store }: TodayScreenProps): ReactElement {
   return (
     <div className="today">
       <h1 className="screen__title">今日</h1>
-      <BackupNotice lastBackupAt={store.getLastBackupAt()} hasRecords={Object.keys(data.days).length > 0} now={now} />
       <ErrorMessage message={runner.error} />
       {stale ? <StaleNotice /> : renderBody(props, store, runner)}
     </div>

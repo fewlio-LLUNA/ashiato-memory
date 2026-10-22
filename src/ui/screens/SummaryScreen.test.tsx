@@ -93,4 +93,72 @@ describe('SummaryScreen', () => {
     const moved = container.querySelector('input[aria-label="庶務の補正（分）"]') as HTMLInputElement;
     expect(moved.value).toBe('0');
   });
+
+  describe('補正の「−」トグル', () => {
+    const LABEL = '庶務の補正（分）';
+    const SIGN_LABEL = '庶務の補正をマイナスにする';
+
+    function field(): HTMLInputElement {
+      return container.querySelector(`input[aria-label="${LABEL}"]`) as HTMLInputElement;
+    }
+
+    function signButton(): HTMLButtonElement {
+      return container.querySelector(`button[aria-label="${SIGN_LABEL}"]`) as HTMLButtonElement;
+    }
+
+    function setup(): ReturnType<typeof createTestStore> {
+      const store = createTestStore();
+      store.clockIn(Date.now() - 2 * HOUR_MS);
+      act(() => root.render(<SummaryScreen store={store} />));
+      return store;
+    }
+
+    it('絶対値を入れて「−」を押すと負の値が確定する', () => {
+      const store = setup();
+      typeInto(field(), '10');
+      act(() => signButton().click());
+      expect(Object.values(store.getState().days)[0]?.adjustments['general']).toBe(-10);
+      expect(signButton().getAttribute('aria-pressed')).toBe('true');
+      expect(field().value).toBe('10');
+    });
+
+    it('もう一度押すと正に戻る', () => {
+      const store = setup();
+      typeInto(field(), '10');
+      act(() => signButton().click());
+      act(() => signButton().click());
+      const day = Object.values(store.getState().days)[0];
+      expect(day?.adjustments['general']).toBe(10);
+      expect(signButton().getAttribute('aria-pressed')).toBe('false');
+    });
+
+    it('実測を超えるマイナスは却下され、表示が元に戻る', () => {
+      const store = createTestStore();
+      store.clockIn();
+      act(() => root.render(<SummaryScreen store={store} />));
+      typeInto(field(), '999');
+      act(() => signButton().click());
+      expect(container.querySelector('[role="alert"]')).not.toBeNull();
+      expect(field().value).toBe('0');
+      expect(signButton().getAttribute('aria-pressed')).toBe('false');
+    });
+
+    it('PC で "-10" と直接入力すると符号がトグルに移り、確定で -10 になる', () => {
+      const store = setup();
+      typeInto(field(), '-10');
+      expect(field().value).toBe('10');
+      expect(signButton().getAttribute('aria-pressed')).toBe('true');
+      commitWithEnter(field());
+      const day = Object.values(store.getState().days)[0];
+      expect(day?.adjustments['general']).toBe(-10);
+    });
+
+    it('整数でない入力は通知され、元の値に戻る', () => {
+      setup();
+      typeInto(field(), '1.5');
+      commitWithEnter(field());
+      expect(container.querySelector('[role="alert"]')).not.toBeNull();
+      expect(field().value).toBe('0');
+    });
+  });
 });

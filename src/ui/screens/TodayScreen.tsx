@@ -5,6 +5,7 @@ import type { AppData, AppStore, EpochMs, WorkDay } from '../../shared/types';
 import { DayTotals } from '../components/DayTotals';
 import { ErrorMessage } from '../components/ErrorMessage';
 import { NewTaskForm } from '../components/NewTaskForm';
+import { SegmentHistory } from '../components/SegmentHistory';
 import { StatusPanel } from '../components/StatusPanel';
 import { TaskButtons } from '../components/TaskButtons';
 import { useActionRunner, type ActionRunner } from '../hooks/useActionRunner';
@@ -94,6 +95,7 @@ export function TodayScreen({ store }: TodayScreenProps): ReactElement {
       <h1 className="screen__title">今日</h1>
       <ErrorMessage message={runner.error} />
       {stale ? <StaleNotice /> : renderBody(props, store, runner)}
+      {today && !stale && <SegmentHistory key={today.date} store={store} data={data} day={today} collapsible />}
     </div>
   );
 }

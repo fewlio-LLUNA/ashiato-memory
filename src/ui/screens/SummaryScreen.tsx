@@ -123,7 +123,7 @@ export function SummaryScreen({ store }: SummaryScreenProps): ReactElement {
         <SummaryTable data={data} rows={tableRows(data, day, range.perTask, now)} editor={editor} />
         {editor && <p className="muted">補正は ±分 で入力し、Enter かフォーカスを外すと反映されます。</p>}
       </section>
-      {day && <SegmentHistory data={data} day={day} />}
+      {day && <SegmentHistory key={day.date} store={store} data={data} day={day} />}
     </div>
   );
 }

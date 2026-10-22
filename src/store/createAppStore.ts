@@ -1,12 +1,13 @@
 import { LAST_BACKUP_KEY, STORAGE_KEY } from '../shared/constants';
-import type {
-  AppData,
-  AppStore,
-  DateKey,
-  EpochMs,
-  SwitchTarget,
-  Task,
-  TaskId,
+import {
+  DomainError,
+  type AppData,
+  type AppStore,
+  type DateKey,
+  type EpochMs,
+  type SwitchTarget,
+  type Task,
+  type TaskId,
 } from '../shared/types';
 import * as actions from './actions';
 import {
@@ -140,6 +141,11 @@ export function createAppStore(options: AppStoreOptions = {}): AppStore {
 
     setAdjustment: (date: DateKey, taskId: TaskId, minutes: number) =>
       mutate((d) => actions.setAdjustment(d, date, taskId, minutes, clock())),
+
+    // L4 の仮置き。A6 で actions.editSegment への配線に置き換える
+    editSegment: () => {
+      throw new DomainError('履歴の編集はまだ使えません。');
+    },
 
     exportJson(now: EpochMs = clock()): string {
       syncLatest();

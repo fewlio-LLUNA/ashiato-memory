@@ -38,6 +38,12 @@ export interface AppData {
 
 export type SwitchTarget = { kind: 'task'; taskId: TaskId } | { kind: 'break' };
 
+/** 改訂1 F19: 切り替え履歴1行の編集内容。変更しない項目も現在値を入れて渡す */
+export interface SegmentEdit {
+  start: EpochMs;        // その行の開始時刻（直前の行の end も同じ値になる）
+  target: SwitchTarget;  // その行の業務または休憩
+}
+
 export interface TaskTotal {
   taskId: TaskId;
   measuredMinutes: number;    // 実測（丸め後）
@@ -93,6 +99,9 @@ export interface AppStore {
 
   // 補正
   setAdjustment(date: DateKey, taskId: TaskId, minutes: number): void;
+
+  // 履歴編集（改訂1 F19）。index は day.segments の添字。開始時刻と対象を1回で原子的に更新する
+  editSegment(date: DateKey, index: number, edit: SegmentEdit, now?: EpochMs): void;
 
   // バックアップ
   exportJson(now?: EpochMs): string; // 呼んだ時刻を最終バックアップ日時として記録

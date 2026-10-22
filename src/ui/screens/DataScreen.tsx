@@ -18,6 +18,9 @@ interface DataScreenProps {
 const IMPORT_CONFIRM = '現在のデータは、読み込むファイルの内容で置き換わります。よろしいですか？';
 const IMPORT_DONE = 'データを読み込みました。';
 const IMPORT_READ_ERROR = 'ファイルを読み込めませんでした。';
+const IMPORT_TOO_LARGE = 'ファイルが大きすぎます（5MB まで）。書き出したバックアップファイルを選んでください。';
+// 読み込めるファイルの上限。巨大なファイルを読んでタブが固まるのを防ぐ
+export const MAX_BACKUP_BYTES = 5 * 1024 * 1024;
 
 function lastBackupText(at: EpochMs | null): string {
   if (at === null) return 'まだ書き出していません';
@@ -43,8 +46,15 @@ export function DataScreen({ store }: DataScreenProps): ReactElement {
     const input = event.target;
     const file = input.files?.[0];
     input.value = '';
-    if (!file || !window.confirm(IMPORT_CONFIRM)) return;
+    if (!file) return;
     setDone(null);
+    if (file.size > MAX_BACKUP_BYTES) {
+      runner.run(() => {
+        throw new DomainError(IMPORT_TOO_LARGE);
+      });
+      return;
+    }
+    if (!window.confirm(IMPORT_CONFIRM)) return;
     const text = await file.text().catch(() => null);
     const imported = runner.run(() => {
       if (text === null) throw new DomainError(IMPORT_READ_ERROR);

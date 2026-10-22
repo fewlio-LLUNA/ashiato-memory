@@ -4,7 +4,7 @@
 > 更新したら即コミット（`docs: ボード更新`）。各ワーカーは**自分の行だけ**書き換える。
 > 構造変更（タスク追加・境界変更・要相談の裁定）はリーダーOpusが行う。
 
-最終更新: リーダーOpus 2026-10-22（巡回レビュー5回目: B6 合格、B8 差し戻し）
+最終更新: リーダーOpus 2026-10-22（巡回レビュー6回目: B8 再差し戻し）
 
 ## ファイルオーナーシップ（並行作業の境界）
 - **Sonnet A**: `src/domain/**`, `src/store/**`
@@ -43,13 +43,19 @@
 | A6 | F19 Store: `actions.editSegment`（§4.3 の検証順）と `createAppStore` への配線＋テスト | A | 完了 | L4 | src/store/actions.ts, createAppStore.ts |
 | A7 | 改訂1 Domain: `time.ts` に `withClockTime`・`calendarWeeks`（§4.2）＋テスト（月曜始まり・月初が日曜の月・2月・不正な "HH:MM"） | A | 完了 | - | src/domain/time.ts |
 | B7 | F17 バックアップ注意を今日画面から外しデータ画面へ（§8.3）＋テスト | B | 完了 | - | TodayScreen.tsx, DataScreen.tsx, BackupNotice.tsx |
-| B8 | F16 補正欄の「−」トグル（§8.2）＋テスト（トグルで負の値が確定・却下時に戻る・PCの "-10" 直接入力） | B | レビュー待ち | - | components/AdjustInput.tsx, summary.css |
+| B8 | F16 補正欄の「−」トグル（§8.2）＋テスト（トグルで負の値が確定・却下時に戻る・PCの "-10" 直接入力） | B | 修正中 | - | components/AdjustInput.tsx, summary.css |
 | B9 | F18 集計「日」のカレンダー（§8.4）＋テスト（記録日の印・選択で日付移動・未来日は押せない） | B | 完了 | A7 | components/MonthCalendar.tsx, SummaryScreen.tsx |
 | B10 | F19 履歴編集 UI（§8.5）: `SegmentHistory` の編集モード、今日画面への履歴（折りたたみ）追加＋テスト | B | 完了 | L4, A6, A7 | components/SegmentHistory.tsx, TodayScreen.tsx, SummaryScreen.tsx |
 | L6 | 改訂1 統合確認: 要件 §7 の（改訂1）9項目を確認、dist の外部参照 grep、デプロイ、ユーザーへ提示（iPhone 実機のアイコン確認はユーザーに依頼） | L | 完了 | 改訂1全タスク | - |
 
 ## 要相談 / 申し送り
 > 境界をまたぐ変更、契約の変更提案、ブロッカーをここに起票。リーダーが裁定して解消。
+- 【巡回レビュー6回目・リーダーより 2026-10-22】**B8 再差し戻し（修正中）**（ada9016）
+  - 良くなった点: 375px で入力欄は 56px になり値が読める。横スクロールなし。620px / 1024px は従来の4列表のまま。typecheck / lint / test(178件) / build 通過
+  - 直すこと: 375px の2段表示で、**見出しと各行の「実測」「合計」の列位置が揃っていない**。`tr` ごとに独立したグリッドで `auto` 列の幅が行ごとに決まるため。実測の右端は、見出し 296px・庶務の行 288px・「API設計レビュー（BackendTeam）」の行 248px とばらばら。合計の左端も 308 / 300 / 260px。業務どうしを縦に見比べられない
+    - 実測・合計の列を全行で同じ幅にする。例: `grid-template-columns: minmax(0, 1fr) var(--num-col) var(--num-col)` のように固定幅の定数にし、`font-variant-numeric: tabular-nums` も付ける。幅は「10時間30分」が太字で1行に収まる値にする
+    - 確認方法: 375px で、見出し行と全行の実測セル・合計セルの `getBoundingClientRect().right` が一致すること。前回と同じく、入力欄が 3.5rem 以上あること・`scrollWidth <= 375` であることも確かめる
+  - 任意: ブレークポイントが `app.css` は 640px、`summary.css` は 600px で異なる。601〜640px ではナビはスマホ表示なのに表は4列になる。揃えるなら 640px に
 - 【巡回レビュー5回目・リーダーより 2026-10-22】
   - **B6（＋B9 の任意指摘2点）合格→完了**（42d1a69）。数値列は1行に収まり、375px で長い業務名（英字・日本語・混在）でも横スクロールなし。カレンダーの表示月の追従と `aria-live` も確認
   - **B8 差し戻し（修正中）** `src/ui/styles/summary.css` の `.adjust-input`

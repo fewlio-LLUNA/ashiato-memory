@@ -42,7 +42,7 @@ export function PeriodSwitcher({ mode, anchor, onModeChange, onShift, onLabelCli
           <ChevronLeftIcon size={20} />
         </button>
         {onLabelClick ? (
-          <button type="button" className="btn period__label" aria-expanded={labelExpanded} onClick={onLabelClick}>
+          <button type="button" className="btn period__label" aria-expanded={labelExpanded} aria-live="polite" onClick={onLabelClick}>
             <CalendarIcon size={18} />
             {periodLabel(mode, anchor)}
           </button>

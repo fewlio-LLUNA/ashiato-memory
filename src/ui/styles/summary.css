@@ -134,7 +134,12 @@ button.period__label {
   border-bottom: 1px solid var(--color-border);
   text-align: left;
   font-weight: normal;
-  overflow-wrap: anywhere;
+}
+
+/* 業務名は単語の途中で切らず、長すぎる語だけ折り返す */
+.summary-table tbody th {
+  overflow-wrap: break-word;
+  word-break: normal;
 }
 
 .summary-table thead th {
@@ -147,6 +152,7 @@ button.period__label {
 }
 
 .summary-table .num {
+  white-space: nowrap;
   text-align: right;
 }
 

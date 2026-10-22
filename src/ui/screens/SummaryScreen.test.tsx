@@ -248,6 +248,15 @@ describe('SummaryScreen', () => {
       expect((container.querySelector('button[aria-label="次の月"]') as HTMLButtonElement).disabled).toBe(false);
     });
 
+    it('カレンダーを開いたまま前の期間へ移動すると、表示月も追従する', () => {
+      setupWithPastDay();
+      openCalendar();
+      const before = container.querySelector('.calendar__title')?.textContent;
+      const prev = container.querySelector('button[aria-label="前の期間"]') as HTMLButtonElement;
+      for (let i = 0; i < 25; i++) act(() => prev.click());
+      expect(container.querySelector('.calendar__title')?.textContent).not.toBe(before);
+    });
+
     it('選んだ日を移動しても入力途中の補正は持ち越されない', () => {
       setupWithPastDay();
       typeInto(container.querySelector('input[aria-label="庶務の補正（分）"]') as HTMLInputElement, '7');

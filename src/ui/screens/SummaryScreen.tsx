@@ -1,7 +1,7 @@
 import { useState, type ReactElement } from 'react';
 import { formatMinutes } from '../../domain/format';
 import { summarizeDay, summarizeRange } from '../../domain/summary';
-import { toDateKey } from '../../domain/time';
+import { monthRange, toDateKey } from '../../domain/time';
 import type { AppData, AppStore, DateKey, EpochMs, TaskTotal, WorkDay } from '../../shared/types';
 import { ErrorMessage } from '../components/ErrorMessage';
 import { MonthCalendar } from '../components/MonthCalendar';
@@ -110,6 +110,7 @@ export function SummaryScreen({ store }: SummaryScreenProps): ReactElement {
       />
       {mode === 'day' && calendarOpen && (
         <MonthCalendar
+          key={monthRange(anchor).from}
           initialMonth={anchor}
           selected={anchor}
           today={toDateKey(now)}

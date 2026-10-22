@@ -36,7 +36,7 @@
 | B3 | 集計画面: 日/週/月切替と前後移動、業務別合計表、日次は±分補正入力と切り替え履歴（時刻・業務） | B | 完了 | B1 | src/ui/screens/SummaryScreen.tsx |
 | B4 | 業務管理画面（改名・非表示/再表示・上下並べ替え）、データ画面（書き出し/読み込み・最終バックアップ日時・「データはこの端末のブラウザにのみ保存」の説明）、打刻忘れダイアログ | B | 完了 | B1 | src/ui/screens/TasksScreen.tsx, DataScreen.tsx |
 | B5 | fakeStore → 実Store差し替え（`main.tsx`）、`dev/` 削除、375px 幅確認 | B | 完了 | A5, B2-B4 | src/main.tsx, src/ui/dev/ |
-| B6 | 改善（任意・受け入れ外）: 375px の集計表で数値「1時間30分」や業務名が途中で折り返されて読みにくい。数値列は `white-space: nowrap`、業務名は単語途中で切れないよう列幅・折り返しを調整 | B | 未着手 | - | src/ui/styles/summary.css |
+| B6 | 改善（任意・受け入れ外）: 375px の集計表で数値「1時間30分」や業務名が途中で折り返されて読みにくい。数値列は `white-space: nowrap`、業務名は単語途中で切れないよう列幅・折り返しを調整 | B | レビュー待ち | - | src/ui/styles/summary.css |
 | L3 | 統合確認: 要件定義 §7 受け入れ条件の全項目チェック、dist の外部参照 grep、デプロイ、ユーザーへ提示 | L | 完了 | 全タスク | - |
 | L4 | 改訂1の契約: 設計書 §4.1 の `SegmentEdit` 型と `AppStore.editSegment` を `src/shared/types.ts` に書き起こす。fake 実装がないので型追加だけでビルドが落ちる場合は、A6 着手まで `createAppStore` に「未実装」DomainError を投げる仮メソッドを置いてよい（A に一言起票） | L | 完了 | - | src/shared/types.ts |
 | L5 | F15 アプリアイコン（設計書 §8.1）: `public/icon.svg`・`public/apple-touch-icon.png`(180px)・`index.html` のリンク差し替え・書き出し手順の保存 | L | 完了 | - | public/**, index.html, scripts/ |

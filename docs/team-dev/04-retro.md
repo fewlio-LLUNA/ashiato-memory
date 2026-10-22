@@ -32,5 +32,5 @@
 | templates/design.md §6 | 「見た目の確認（画面幅とスクショ方法）」欄を追加 | B8 の見落とし・見た目の基準がない | 反映済み（claude-config 08c5955） |
 | collab-protocol / team-worker | UI を変えた PR は画面幅ごとのスクショを貼ってからレビュー依頼 | B8 の見落とし | 反映済み（claude-config 08c5955） |
 | team-leader | スクショを目視し、値の反映だけで合格にしない | B8 の見落とし | 反映済み（claude-config 08c5955） |
-| design-handoff / team-leader | 受け入れ条件の検証スクリプト（E2E）を L1 でリポジトリに置き、CI で毎回流す。改訂時は追記する | 検証スクリプトを毎回作り直している | 一部反映（L1 で E2E を置き CI で流す。claude-config 1fe5baa）。改訂時の追記は未反映 |
-| req-define | 対応ブラウザ・実機を要件に書き、受け入れ確認の対象にする | 実機確認が完成後に残った | 未反映 |
+| design-handoff / team-leader | 受け入れ条件の検証スクリプト（E2E）を L1 でリポジトリに置き、CI で毎回流す。改訂時は追記する | 検証スクリプトを毎回作り直している | 反映済み（L1 で E2E を置き CI で流す: claude-config 1fe5baa／改訂時の追記: a83cb38） |
+| req-define | 対応ブラウザ・実機を要件に書き、受け入れ確認の対象にする | 実機確認が完成後に残った | 反映済み（claude-config a83cb38） |
